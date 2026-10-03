@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import Logo from './Logo';
 import {
   Building2, Sparkles, Radio, Crosshair, BarChart3,
-  Navigation, Wifi, WifiOff
+  Navigation, Wifi, WifiOff, Database
 } from 'lucide-react';
 
 export default function Navbar({
@@ -17,7 +17,8 @@ export default function Navbar({
   setIsRealtime,
   userLocation,
   liveWeather,
-  onFindNearest
+  onFindNearest,
+  onOpenTigerData
 }) {
   return (
     <header className="top-navbar">
@@ -59,55 +60,65 @@ export default function Navbar({
         <div className="hud-item" title="Peak satellite surface temperature in Raleigh">
           <span className="hud-item-icon" style={{ color: '#eab308' }}>🌡️</span>
           <div className="hud-item-content">
-            <span className="hud-item-label">Peak Temp</span>
+            <span className="hud-item-label">Peak Surface</span>
             <span className="hud-item-value" style={{ color: '#eab308' }}>
-              {kpis?.max_surface_temp ?? 105.5}°F
+              {kpis?.max_surface_temp ?? 102.4}°F
             </span>
           </div>
         </div>
 
-        <div className="hud-item" title="Average tree canopy cover across Raleigh">
-          <span className="hud-item-icon" style={{ color: '#10b981' }}>🌳</span>
+        <div className="hud-item" title="Citywide average urban tree canopy cover">
+          <span className="hud-item-icon" style={{ color: '#22c55e' }}>🌳</span>
           <div className="hud-item-content">
-            <span className="hud-item-label">Canopy</span>
-            <span className="hud-item-value" style={{ color: '#10b981' }}>
-              {kpis?.avg_canopy_pct ?? 39.2}%
+            <span className="hud-item-label">Tree Canopy</span>
+            <span className="hud-item-value" style={{ color: '#22c55e' }}>
+              {kpis?.avg_canopy_pct ?? 31.8}%
             </span>
           </div>
         </div>
 
-        <div className="hud-item" title="Verified public cooling facilities in Raleigh">
-          <span className="hud-item-icon" style={{ color: '#3b82f6' }}>🏛️</span>
+        <div className="hud-item" title="Vulnerable residents with no cooling refuge within a 15-minute walk">
+          <span className="hud-item-icon" style={{ color: '#a855f7' }}>👥</span>
           <div className="hud-item-content">
-            <span className="hud-item-label">Assets</span>
-            <span className="hud-item-value" style={{ color: '#3b82f6' }}>
-              {kpis?.total_cooling_assets ?? 746}
+            <span className="hud-item-label">Unserved Vuln</span>
+            <span className="hud-item-value" style={{ color: '#a855f7' }}>
+              {(kpis?.unserved_vulnerable_pop ?? 18450).toLocaleString()}
             </span>
           </div>
         </div>
 
+        {/* Live Weather pill when real-time mode is on */}
         {isRealtime && liveWeather && (
-          <div
-            className="hud-item"
-            style={{
-              borderColor: liveWeather.risk_color + '66',
-              background: liveWeather.risk_color + '18'
-            }}
-            title={liveWeather.advisory}
-          >
-            <span className="hud-item-icon" style={{ color: liveWeather.risk_color }}>⚡</span>
+          <div className="hud-item live-weather-pill" title="Live meteorological reading from Open-Meteo">
+            <span className="hud-item-icon">🌤️</span>
             <div className="hud-item-content">
-              <span className="hud-item-label">Live Heat</span>
-              <span className="hud-item-value" style={{ color: liveWeather.risk_color }}>
-                {liveWeather.apparent_temperature_f}°F
+              <span className="hud-item-label">Live Raleigh</span>
+              <span className="hud-item-value" style={{ color: '#38bdf8' }}>
+                {liveWeather.temp_f}°F · {liveWeather.humidity_pct}% RH
               </span>
             </div>
           </div>
         )}
       </div>
 
-      {/* ── Nav Actions ── */}
+      {/* ── Actions ── */}
       <div className="nav-actions">
+
+        {/* Tiger Data Hypertable Live Telemetry Button */}
+        <button
+          id="btn-tiger-data"
+          className="btn-nav-action"
+          onClick={onOpenTigerData}
+          title="Open Tiger Data / Timescale Real-Time Telemetry & Continuous Aggregates"
+          style={{
+            borderColor: 'rgba(249, 115, 22, 0.55)',
+            background: 'linear-gradient(135deg, rgba(234, 88, 12, 0.22) 0%, rgba(15, 23, 42, 0.7) 100%)'
+          }}
+        >
+          <span style={{ fontSize: '13px' }}>🐅</span>
+          <span style={{ color: '#fb923c', fontWeight: 600 }}>Tiger Data</span>
+          <span className="live-dot" style={{ backgroundColor: '#f97316' }} />
+        </button>
 
         {/* Real-Time toggle */}
         <button
