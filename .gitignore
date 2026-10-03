@@ -1,0 +1,12 @@
+.env
+/node_modules
+client/node_modules/
+server/node_modules/
+
+services/__pycache__
+
+
+.venv
+/assets
+/cache
+/__pycache__

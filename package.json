@@ -1,0 +1,26 @@
+{
+  "name": "raleigh-climate-hub",
+  "version": "1.0.0",
+  "description": "Interactive geospatial decision-support dashboard for Raleigh urban heat and climate equity",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "server": "node server/index.js",
+    "client": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "dev": "node server/index.js"
+  },
+  "keywords": [
+    "geospatial",
+    "urban-heat",
+    "climate-resilience",
+    "raleigh",
+    "gemini",
+    "elevenlabs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}
