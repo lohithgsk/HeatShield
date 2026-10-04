@@ -30,6 +30,7 @@ export default function App() {
   const [activeDrawer, setActiveDrawer]             = useState(null);
   const [isPlacingIntervention, setIsPlacingIntervention] = useState(false);
   const [activeIntervention, setActiveIntervention] = useState(null);
+  const [selectedInterventionType, setSelectedInterventionType] = useState('Resilience Cooling Center');
   const [audioInitialScript, setAudioInitialScript] = useState('');
 
   // ── Real-time state ──
@@ -130,24 +131,35 @@ export default function App() {
   }, [userLocation]);
 
   // ── Handlers ──
-  const handleInterventionPlaced = (coords) => {
-    setActiveIntervention(coords);
+  const handleInterventionPlaced = async (coords) => {
     setIsPlacingIntervention(false);
     setActiveDrawer('scenario');
+    await handleRunSimulation({
+      lat: coords.lat,
+      lon: coords.lng,
+      interventionType: selectedInterventionType
+    });
   };
 
   const handleRunSimulation = async (simData) => {
-    try {
-      const res = await fetch('/api/simulation/run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(simData)
-      });
-      return await res.json();
-    } catch (err) {
-      console.error('Simulation error:', err);
-      return null;
+    const res = await fetch('/api/scenario/evaluate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(simData)
+    });
+
+    if (!res.ok) {
+      const message = await res.text();
+      throw new Error(`Simulation failed (${res.status}): ${message}`);
     }
+
+    const result = await res.json();
+    if (!result?.config || result.lat == null || result.lon == null) {
+      throw new Error('Simulation returned an invalid intervention result');
+    }
+
+    setActiveIntervention(result);
+    return result;
   };
 
   const handleConsultCopilot = (tract) => {
@@ -235,6 +247,8 @@ export default function App() {
           onClose={() => setActiveDrawer(null)}
           activeIntervention={activeIntervention}
           onRunSimulation={handleRunSimulation}
+          selectedInterventionType={selectedInterventionType}
+          setSelectedInterventionType={setSelectedInterventionType}
           isPlacing={isPlacingIntervention}
           setIsPlacing={setIsPlacingIntervention}
         />

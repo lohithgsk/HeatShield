@@ -285,7 +285,7 @@ export default function MapView({
         })}
 
         {/* Active Dropped Hypothetical Intervention Marker & Catchment */}
-        {activeIntervention && (
+        {activeIntervention?.config?.radius_m != null && (
           <>
             <Circle 
               center={[activeIntervention.lat, activeIntervention.lon]}

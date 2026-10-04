@@ -50,10 +50,11 @@ export default function ScenarioDrawer({
   onClose,
   activeIntervention,
   onRunSimulation,
+  selectedInterventionType,
+  setSelectedInterventionType,
   isPlacing,
   setIsPlacing
 }) {
-  const [selectedType, setSelectedType] = useState('Resilience Cooling Center');
   const [selectedHotspot, setSelectedHotspot] = useState(PRESET_HOTSPOTS[0]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,7 +64,7 @@ export default function ScenarioDrawer({
       await onRunSimulation({
         lat: selectedHotspot.lat,
         lon: selectedHotspot.lon,
-        interventionType: selectedType
+        interventionType: selectedInterventionType
       });
       // Fire confetti celebration on successful simulation
       confetti({
@@ -102,12 +103,12 @@ export default function ScenarioDrawer({
           <div className="intervention-card-grid">
             {INTERVENTIONS.map((item) => {
               const Icon = item.icon;
-              const isSelected = selectedType === item.type;
+              const isSelected = selectedInterventionType === item.type;
               return (
                 <div 
                   key={item.type}
                   className={`intervention-option-card ${isSelected ? 'selected' : ''}`}
-                  onClick={() => setSelectedType(item.type)}
+                  onClick={() => setSelectedInterventionType(item.type)}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Icon size={18} style={{ color: item.color }} />
