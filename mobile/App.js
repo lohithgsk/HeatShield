@@ -37,15 +37,19 @@ export default function App() {
   async function loadData(nextLocation) {
     setBusy(true);
     setError('');
+
+    // Fetch live weather immediately with high priority
+    getLiveWeather(nextLocation)
+      .then(w => setWeather(w))
+      .catch(err => console.warn('Weather fetch error:', err.message));
+
     try {
-      const [nextWeather, nextCooling, nextArea] = await Promise.all([
-        getLiveWeather(nextLocation),
+      const [nextCooling, nextArea] = await Promise.allSettled([
         getNearestCooling(nextLocation),
         getAreaSummary(nextLocation),
       ]);
-      setWeather(nextWeather);
-      setCooling(nextCooling);
-      setArea(nextArea);
+      if (nextCooling.status === 'fulfilled') setCooling(nextCooling.value);
+      if (nextArea.status === 'fulfilled') setArea(nextArea.value);
     } catch (loadError) {
       setError(loadError.message);
     } finally {
