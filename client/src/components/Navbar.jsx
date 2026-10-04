@@ -27,12 +27,12 @@ export default function Navbar({
       <div className="brand-section">
         <Logo size={40} />
         <div className="brand-text">
-          <h1>Raleigh Climate Resilience Hub</h1>
-          <p>City of Raleigh · Urban Heat &amp; Climate Equity</p>
+          <h1>HeatShield</h1>
+          <p>Raleigh · Urban Heat</p>
         </div>
 
         <div className="persona-selector-box">
-          <label>View:</label>
+          <label> </label>
           <select
             className="persona-select"
             value={persona}
