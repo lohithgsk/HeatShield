@@ -6,6 +6,7 @@ import ScenarioDrawer from './components/ScenarioDrawer';
 import CopilotDrawer from './components/CopilotDrawer';
 import AudioDrawer from './components/AudioDrawer';
 import AnalyticsDrawer from './components/AnalyticsDrawer';
+import ForecastDrawer from './components/ForecastDrawer';
 import NearestCoolingModal from './components/NearestCoolingModal';
 import TigerDataModal from './components/TigerDataModal';
 import { Crosshair, X } from 'lucide-react';
@@ -189,6 +190,7 @@ export default function App() {
         liveWeather={liveWeather}
         onFindNearest={handleFindNearest}
         onOpenTigerData={() => setShowTigerModal(true)}
+        onOpenForecast={() => setActiveDrawer(activeDrawer === 'forecast' ? null : 'forecast')}
       />
 
       <div className="workspace-container">
@@ -272,6 +274,11 @@ export default function App() {
           onClose={() => setActiveDrawer(null)}
           tractsGeoJSON={tractsGeoJSON}
           onSelectTract={(t) => { setSelectedTract(t); setActiveDrawer(null); }}
+        />
+
+        <ForecastDrawer
+          isOpen={activeDrawer === 'forecast'}
+          onClose={() => setActiveDrawer(null)}
         />
 
         <NearestCoolingModal

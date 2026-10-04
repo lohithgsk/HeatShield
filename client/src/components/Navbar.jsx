@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import Logo from './Logo';
 import {
-  Building2, Sparkles, Radio, Crosshair, BarChart3,
+  Building2, Sparkles, Radio, Crosshair, BarChart3, BrainCircuit,
   Navigation, Wifi, WifiOff, Database
 } from 'lucide-react';
 
@@ -18,7 +18,8 @@ export default function Navbar({
   userLocation,
   liveWeather,
   onFindNearest,
-  onOpenTigerData
+  onOpenTigerData,
+  onOpenForecast
 }) {
   return (
     <header className="top-navbar">
@@ -195,6 +196,16 @@ export default function Navbar({
         >
           <BarChart3 size={14} />
           <span>Analytics</span>
+        </button>
+
+        <button
+          id="btn-forecast-drawer"
+          className={`btn-nav-action${activeDrawer === 'forecast' ? ' active' : ''}`}
+          onClick={onOpenForecast}
+          title="Open machine-learning heat index forecasts"
+        >
+          <BrainCircuit size={14} style={{ color: '#a78bfa' }} />
+          <span>Forecast</span>
         </button>
       </div>
     </header>

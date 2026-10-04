@@ -98,6 +98,7 @@ All funded interventions feed directly into a transparent public impact ledger, 
 
 - **Frontend:** React 19, Vite, Leaflet, React-Leaflet, Lucide, Vanilla CSS
 - **Backend:** Node.js, Express 5, Axios, Dotenv
+- **ML Forecasting:** Flask, scikit-learn HistGradientBoosting, TigerData telemetry
 - **AI & Voice:** Google Gemini, ElevenLabs
 - **Blockchain:** Solana, wallet-based transaction signing, on-chain intervention ledgers
 - **Mobile Support:** Expo Go
@@ -176,6 +177,27 @@ To execute the backend server, you can either run the following command from the
 ```bash
 node server
 ```
+
+## 4. Run the ML Forecast Service
+
+The Forecast drawer uses the saved `HistGradientBoosting` artifacts from
+`ML_training/artifacts/`. Start the Flask service in a second terminal:
+
+```bash
+C:/Users/Lenovo/miniconda3/python.exe -m pip install -r ml_service/requirements.txt
+python ml_service/app.py
+```
+
+The service listens on `http://127.0.0.1:5050`. Express proxies the browser
+request at `GET /api/forecast`, so the frontend does not need a separate CORS
+configuration. The Forecast action in the navbar displays 30-, 60-, and
+120-minute station predictions and the estimated probability of exceeding a
+90°F heat index.
+
+The inference environment pins scikit-learn to `1.7.1`, matching the version
+used to create the saved model artifacts. If Flask reports a model compatibility
+error, install the requirements with the same Python interpreter used to start
+Flask, then restart it.
 
 Or navigate into the server directory and execute:
 

@@ -7,6 +7,7 @@
     "start": "node server/index.js",
     "server": "node server/index.js",
     "client": "npm --prefix client run dev",
+    "forecast": "python ml_service/app.py",
     "build": "npm --prefix client run build",
     "dev": "node server/index.js"
   },

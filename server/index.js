@@ -17,6 +17,7 @@ if (fs.existsSync(envPath)) {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const FORECAST_SERVICE_URL = process.env.FORECAST_SERVICE_URL || 'http://127.0.0.1:5050';
 // Bind to every interface by default so devices on the same Wi-Fi can reach it.
 // Set HOST=127.0.0.1 when the API should be local-only.
 const HOST = process.env.HOST || '0.0.0.0';
@@ -25,6 +26,28 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 const DATA_DIR = path.resolve(__dirname, '../data');
+const SAMPLE_TELEMETRY_PATH = path.resolve(__dirname, '../ML_training/data/sample_tiger_data.csv');
+
+function loadSampleTelemetry() {
+  if (!fs.existsSync(SAMPLE_TELEMETRY_PATH)) return [];
+  const lines = fs.readFileSync(SAMPLE_TELEMETRY_PATH, 'utf8').trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',');
+  const rows = lines.slice(1).map(line => {
+    const values = line.split(',');
+    return headers.reduce((row, header, index) => {
+      const value = values[index];
+      row[header] = ['latitude', 'longitude', 'temperature_f', 'feels_like_f', 'humidity_pct',
+        'solar_radiation', 'wind_speed_mph', 'heat_index_f', 'uhi_offset_f'].includes(header)
+        ? Number(value)
+        : value;
+      return row;
+    }, {});
+  });
+  const latestByStation = new Map();
+  rows.forEach(row => latestByStation.set(row.station_id, row));
+  return [...latestByStation.values()];
+}
 
 // Helper to safely load JSON files
 function loadGeoJSON(filename) {
@@ -185,6 +208,41 @@ app.get('/api/health', (req, res) => {
     hasElevenLabsKey: Boolean(process.env.ELEVENLABS_API_KEY),
     timestamp: new Date().toISOString()
   });
+});
+
+// ML forecast proxy. The browser only talks to Express; Flask remains an
+// internal model-serving service and receives the latest TigerData observations.
+app.get('/api/forecast', async (req, res) => {
+  try {
+    const telemetry = await tigerService.getLatestTelemetry();
+    let stations = telemetry.stations;
+    let telemetrySource = 'TigerData';
+    if (!telemetry.connected || !stations?.length) {
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(503).json({
+          error: 'Forecasts require live TigerData telemetry.',
+          detail: telemetry.error || 'No station readings available'
+        });
+      }
+      stations = loadSampleTelemetry();
+      telemetrySource = 'sample training telemetry';
+    }
+    if (!stations.length) {
+      return res.status(503).json({ error: 'No telemetry readings are available for forecasting.' });
+    }
+
+    const forecast = await axios.post(`${FORECAST_SERVICE_URL}/forecast`, {
+      stations
+    }, { timeout: 10000 });
+    res.json({ ...forecast.data, telemetry_source: telemetrySource });
+  } catch (err) {
+    const detail = err.response?.data?.error || err.message;
+    res.status(503).json({
+      error: 'Forecast service unavailable.',
+      detail,
+      service_url: FORECAST_SERVICE_URL
+    });
+  }
 });
 
 // 2. GeoJSON Layers
