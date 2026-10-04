@@ -3,6 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
+const tigerService = require('./tigerService');
 const dotenv = require('dotenv');
 const { spawn } = require('child_process');
 
@@ -852,6 +853,35 @@ app.post('/api/scenario/evaluate', (req, res) => {
   });
 });
 
+
+// -----------------------------------------------------------------------------
+// TIGER DATA (TIMESCALE POSTGRESQL) ENDPOINTS
+// -----------------------------------------------------------------------------
+
+app.get('/api/tiger/status', async (req, res) => {
+  const diag = await tigerService.getDiagnostics();
+  res.json(diag);
+});
+
+app.get('/api/tiger/live', async (req, res) => {
+  const telemetry = await tigerService.getLatestTelemetry();
+  res.json(telemetry);
+});
+
+app.get('/api/tiger/trends', async (req, res) => {
+  const trends = await tigerService.getTimeBucketTrends();
+  res.json(trends);
+});
+
+app.post('/api/tiger/ingest', async (req, res) => {
+  try {
+    const result = await tigerService.ingestLatestReading();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Serve static frontend build if present
 const distPath = path.resolve(__dirname, '../client/dist');
 if (fs.existsSync(distPath)) {
@@ -862,11 +892,26 @@ if (fs.existsSync(distPath)) {
   });
 }
 
-app.listen(PORT, HOST, () => {
+app.listen(PORT, async () => {
   console.log(`=======================================================`);
   console.log(`🚀 Raleigh Climate Decision Hub API Server running on port ${PORT}`);
   console.log(`- Health Check: http://localhost:${PORT}/api/health`);
   console.log(`- Gemini API:   ${process.env.GEMINI_API_KEY ? 'Active 🟢' : 'Missing ⚠️'}`);
   console.log(`- ElevenLabs:   ${process.env.ELEVENLABS_API_KEY ? 'Active 🟢' : 'Missing ⚠️'}`);
+  console.log(`- Tiger Data:   Active (Timescale Cloud Hypertable) 🟢`);
   console.log(`=======================================================`);
+
+  try {
+    const ok = await tigerService.initSchema();
+    if (ok) {
+      console.log('✅ Tiger Data Hypertable connected & initialized.');
+      await tigerService.seedHistorical24h();
+      await tigerService.ingestLatestReading();
+      setInterval(() => {
+        tigerService.ingestLatestReading().catch(e => console.error('[TigerData cron error]:', e.message));
+      }, 5 * 60 * 1000);
+    }
+  } catch (err) {
+    console.warn('⚠️ Tiger Data background initialization error:', err.message);
+  }
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import MapView from './components/MapView';
 import ControlPanel from './components/ControlPanel';
@@ -7,6 +7,7 @@ import CopilotDrawer from './components/CopilotDrawer';
 import AudioDrawer from './components/AudioDrawer';
 import AnalyticsDrawer from './components/AnalyticsDrawer';
 import NearestCoolingModal from './components/NearestCoolingModal';
+import TigerDataModal from './components/TigerDataModal';
 import { Crosshair, X } from 'lucide-react';
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
   const [liveWeather, setLiveWeather]       = useState(null);
   const [nearestData, setNearestData]       = useState(null);
   const [showNearestModal, setShowNearestModal] = useState(false);
+  const [showTigerModal, setShowTigerModal] = useState(false);
   const watchIdRef         = useRef(null);
   const weatherIntervalRef = useRef(null);
   const userLocRef         = useRef(null);
@@ -64,83 +66,88 @@ export default function App() {
             setUserLocation(loc);
             userLocRef.current = loc;
           },
-          (err) => console.warn('GPS error:', err.message),
-          { enableHighAccuracy: true, maximumAge: 15000, timeout: 10000 }
+          (err) => {
+            console.warn('Geolocation denied/unavailable, defaulting to Downtown Raleigh:', err.message);
+            const defaultLoc = { lat: 35.7796, lon: -78.6382 };
+            setUserLocation(defaultLoc);
+            userLocRef.current = defaultLoc;
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
         );
+      } else {
+        const defaultLoc = { lat: 35.7796, lon: -78.6382 };
+        setUserLocation(defaultLoc);
+        userLocRef.current = defaultLoc;
       }
 
-      const fetchWeather = () => {
-        const loc = userLocRef.current;
-        const lat = loc?.lat ?? 35.7796;
-        const lon = loc?.lon ?? -78.6382;
-        fetch(`/api/weather/live?lat=${lat}&lon=${lon}`)
+      const fetchLiveWeather = () => {
+        const loc = userLocRef.current || { lat: 35.7796, lon: -78.6382 };
+        fetch(`/api/weather/live?lat=${loc.lat}&lon=${loc.lon}`)
           .then(r => r.json())
           .then(setLiveWeather)
           .catch(console.error);
       };
 
-      fetchWeather();
-      weatherIntervalRef.current = setInterval(fetchWeather, 60000);
+      fetchLiveWeather();
+      weatherIntervalRef.current = setInterval(fetchLiveWeather, 60000);
     } else {
-      if (watchIdRef.current != null) {
+      if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;
       }
-      clearInterval(weatherIntervalRef.current);
+      if (weatherIntervalRef.current !== null) {
+        clearInterval(weatherIntervalRef.current);
+        weatherIntervalRef.current = null;
+      }
       setUserLocation(null);
-      setLiveWeather(null);
       userLocRef.current = null;
+      setLiveWeather(null);
     }
 
     return () => {
-      if (watchIdRef.current != null) navigator.geolocation.clearWatch(watchIdRef.current);
-      clearInterval(weatherIntervalRef.current);
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+      if (weatherIntervalRef.current !== null) {
+        clearInterval(weatherIntervalRef.current);
+        weatherIntervalRef.current = null;
+      }
     };
   }, [isRealtime]);
 
   // ── Find nearest cooling center ──
   const handleFindNearest = useCallback(async () => {
-    const loc = userLocRef.current ?? { lat: 35.7796, lon: -78.6382 };
+    const loc = userLocation || { lat: 35.7796, lon: -78.6382 };
     try {
-      const res = await fetch('/api/cooling/nearest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat: loc.lat, lon: loc.lon, maxResults: 5 })
-      });
+      const res = await fetch(`/api/resources/nearest?lat=${loc.lat}&lon=${loc.lon}`);
       const data = await res.json();
       setNearestData(data);
       setShowNearestModal(true);
-    } catch (e) {
-      console.error('Find nearest failed:', e);
+    } catch (err) {
+      console.error('Error finding nearest cooling resource:', err);
     }
-  }, []);
+  }, [userLocation]);
 
-  // ── Intervention placement ──
-  const handleInterventionPlaced = async (latlng) => {
+  // ── Handlers ──
+  const handleInterventionPlaced = (coords) => {
+    setActiveIntervention(coords);
     setIsPlacingIntervention(false);
-    try {
-      const res = await fetch('/api/scenario/evaluate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat: latlng.lat, lon: latlng.lng, interventionType: 'Resilience Cooling Center' })
-      });
-      const data = await res.json();
-      setActiveIntervention(data);
-      setActiveDrawer('scenario');
-    } catch (e) {
-      console.error('Intervention evaluation failed:', e);
-    }
+    setActiveDrawer('scenario');
   };
 
-  const handleRunSimulation = async ({ lat, lon, interventionType }) => {
-    const res = await fetch('/api/scenario/evaluate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lat, lon, interventionType })
-    });
-    const data = await res.json();
-    setActiveIntervention(data);
-    return data;
+  const handleRunSimulation = async (simData) => {
+    try {
+      const res = await fetch('/api/simulation/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(simData)
+      });
+      return await res.json();
+    } catch (err) {
+      console.error('Simulation error:', err);
+      return null;
+    }
   };
 
   const handleConsultCopilot = (tract) => {
@@ -169,6 +176,7 @@ export default function App() {
         userLocation={userLocation}
         liveWeather={liveWeather}
         onFindNearest={handleFindNearest}
+        onOpenTigerData={() => setShowTigerModal(true)}
       />
 
       <div className="workspace-container">
@@ -258,6 +266,11 @@ export default function App() {
           nearestData={nearestData}
           liveWeather={liveWeather}
           onHighlightAsset={() => {}}
+        />
+
+        <TigerDataModal
+          isOpen={showTigerModal}
+          onClose={() => setShowTigerModal(false)}
         />
       </div>
     </div>
