@@ -4,6 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const tigerService = require('./tigerService');
+const alertService = require('./alertService');
+const historicalService = require('./historicalService');
+const warRoomService = require('./warRoomService');
 const dotenv = require('dotenv');
 const { spawn } = require('child_process');
 
@@ -198,6 +201,26 @@ app.get('/api/geojson/resources', (req, res) => {
   res.json(coolingResourcesGeoJSON);
 });
 
+app.get('/api/warroom/scenarios', (req, res) => {
+  res.json(warRoomService.getScenarios());
+});
+
+app.get('/api/warroom/scenarios/:id', (req, res) => {
+  const sc = warRoomService.getScenarioById(req.params.id);
+  if (!sc) return res.status(404).json({ error: 'Scenario not found' });
+  res.json(sc);
+});
+
+app.get('/api/historical/heatwaves', (req, res) => {
+  res.json(historicalService.getAllEvents());
+});
+
+app.get('/api/historical/heatwaves/:id', (req, res) => {
+  const evt = historicalService.getEventById(req.params.id);
+  if (!evt) return res.status(404).json({ error: 'Not found' });
+  res.json(evt);
+});
+
 app.get('/api/geojson/boundary', (req, res) => {
   if (!boundaryGeoJSON) return res.status(404).json({ error: 'Boundary not found' });
   res.json(boundaryGeoJSON);
@@ -264,16 +287,8 @@ app.get('/api/weather/live', async (req, res) => {
   }
 });
 
-// 2c. Real-Time Nearest Cooling Area Calculator (Location-Aware)
-app.post('/api/cooling/nearest', (req, res) => {
-  const { lat, lon, maxResults = 5 } = req.body;
-  if (lat == null || lon == null) {
-    return res.status(400).json({ error: 'lat and lon are required' });
-  }
-
-  if (!coolingResourcesGeoJSON || !coolingResourcesGeoJSON.features) {
-    return res.status(500).json({ error: 'Cooling resources not loaded' });
-  }
+function computeNearestCooling(lat, lon, maxResults = 5) {
+  if (!coolingResourcesGeoJSON || !coolingResourcesGeoJSON.features) return null;
 
   const items = coolingResourcesGeoJSON.features.map(f => {
     const p = f.properties;
@@ -299,16 +314,33 @@ app.post('/api/cooling/nearest', (req, res) => {
   });
 
   items.sort((a, b) => a.distance_meters - b.distance_meters);
-
   const nearest = items[0];
   const nearestIndoor = items.find(i => i.category === 'Indoor A/C Refuge') || nearest;
 
-  res.json({
+  return {
     user_location: { lat, lon },
     nearest_asset: nearest,
     nearest_indoor_refuge: nearestIndoor,
     top_options: items.slice(0, maxResults)
-  });
+  };
+}
+
+// 2c. Real-Time Nearest Cooling Area Calculator (Supports both POST & GET on /cooling and /resources)
+app.post(['/api/cooling/nearest', '/api/resources/nearest'], (req, res) => {
+  const { lat, lon, maxResults = 5 } = req.body || {};
+  if (lat == null || lon == null) return res.status(400).json({ error: 'lat and lon are required' });
+  const result = computeNearestCooling(Number(lat), Number(lon), Number(maxResults));
+  if (!result) return res.status(500).json({ error: 'Cooling resources not loaded' });
+  res.json(result);
+});
+
+app.get(['/api/cooling/nearest', '/api/resources/nearest'], (req, res) => {
+  const lat = req.query.lat ? parseFloat(req.query.lat) : 35.7796;
+  const lon = req.query.lon ? parseFloat(req.query.lon) : -78.6382;
+  const maxResults = req.query.maxResults ? parseInt(req.query.maxResults, 10) : 5;
+  const result = computeNearestCooling(lat, lon, maxResults);
+  if (!result) return res.status(500).json({ error: 'Cooling resources not loaded' });
+  res.json(result);
 });
 
 // 2d. User area heat summary
@@ -858,6 +890,32 @@ app.post('/api/scenario/evaluate', (req, res) => {
 // TIGER DATA (TIMESCALE POSTGRESQL) ENDPOINTS
 // -----------------------------------------------------------------------------
 
+
+// -----------------------------------------------------------------------------
+// EMERGENCY CITIZEN ALERTS & DISPATCH API
+// -----------------------------------------------------------------------------
+
+app.get('/api/alerts', (req, res) => {
+  res.json(alertService.getAlerts());
+});
+
+app.post('/api/alerts', (req, res) => {
+  const newAlert = alertService.createAlert(req.body);
+  res.status(201).json(newAlert);
+});
+
+app.post('/api/alerts/:id/dispatch', (req, res) => {
+  const updated = alertService.dispatchUnit(req.params.id, req.body?.unitName);
+  if (!updated) return res.status(404).json({ error: 'Alert not found' });
+  res.json(updated);
+});
+
+app.post('/api/alerts/:id/resolve', (req, res) => {
+  const updated = alertService.resolveAlert(req.params.id);
+  if (!updated) return res.status(404).json({ error: 'Alert not found' });
+  res.json(updated);
+});
+
 app.get('/api/tiger/status', async (req, res) => {
   const diag = await tigerService.getDiagnostics();
   res.json(diag);
@@ -880,6 +938,60 @@ app.post('/api/tiger/ingest', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+
+// -----------------------------------------------------------------------------
+// TIGER DATA AUTHENTICATION & COMMUNITY SUBSCRIPTION ENDPOINTS
+// -----------------------------------------------------------------------------
+
+app.post('/api/auth/login', async (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ success: false, error: 'Username and password are required' });
+  }
+  const result = await tigerService.authenticateUser(username, password);
+  if (!result.success) {
+    return res.status(401).json(result);
+  }
+  res.json(result);
+});
+
+app.get('/api/auth/sample-users', async (req, res) => {
+  try {
+    const users = await tigerService.getSampleUsers();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/community/subscribe', async (req, res) => {
+  const { email, addresses } = req.body || {};
+  if (!email || !addresses || !addresses.length) {
+    return res.status(400).json({ success: false, error: 'Valid email and at least one address are required' });
+  }
+  const result = await tigerService.saveCommunitySubscription(email, addresses);
+  if (!result.success) {
+    return res.status(500).json(result);
+  }
+  res.json({
+    ...result,
+    simulatedEmailSent: true,
+    mailDispatchDetails: {
+      recipient: email,
+      subject: '⚠️ HeatShield Raleigh Advisory — Address Microclimate Monitoring Activated',
+      dispatchedAt: new Date().toISOString(),
+      monitoredLocationsCount: addresses.length
+    }
+  });
+});
+
+app.get('/api/community/subscriptions', async (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ error: 'Email parameter required' });
+  const subs = await tigerService.getCommunitySubscriptions(email);
+  res.json(subs);
 });
 
 // Serve static frontend build if present

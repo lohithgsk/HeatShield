@@ -1,4 +1,4 @@
-﻿const { Pool } = require('pg');
+const { Pool } = require('pg');
 const axios = require('axios');
 
 // Raleigh Microclimate Station Nodes (distributed across key census tracts)
@@ -91,8 +91,48 @@ async function initSchema() {
         ON raleigh_heat_telemetry (tract_geoid, recorded_at DESC);
       `);
 
+      // ── Municipal HeatShield Users Table (City Planners & EMS Dispatch) ──
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS heatshield_users (
+          id            SERIAL PRIMARY KEY,
+          username      VARCHAR(80) UNIQUE NOT NULL,
+          password_hash VARCHAR(100) NOT NULL,
+          full_name     VARCHAR(120) NOT NULL,
+          role          VARCHAR(50) NOT NULL, -- 'city_planner' | 'emergency_ems'
+          department    VARCHAR(120),
+          badge_number  VARCHAR(50),
+          created_at    TIMESTAMPTZ DEFAULT NOW()
+        );
+      `);
+
+      // Seed Default Sample Users if empty
+      const userCheck = await client.query('SELECT COUNT(*) FROM heatshield_users;');
+      if (parseInt(userCheck.rows[0].count, 10) === 0) {
+        console.log('[TigerData] Seeding sample users in heatshield_users...');
+        await client.query(`
+          INSERT INTO heatshield_users (username, password_hash, full_name, role, department, badge_number)
+          VALUES 
+            ('planner_sarah', 'raleigh2026!', 'Sarah Jenkins, AICP', 'city_planner', 'Raleigh Urban Planning & Heat Equity', 'PLN-8820'),
+            ('planner_marcus', 'heatshield!', 'Marcus Vance, PE', 'city_planner', 'Capital Improvement & Shading Infrastructure', 'PLN-4192'),
+            ('ems_dispatch', 'wake911!', 'Dispatcher Ortiz', 'emergency_ems', 'Wake County 911 Communications', 'WAKE-911-D'),
+            ('ems_captain_davis', 'dispatch2026!', 'Capt. Ronald Davis', 'emergency_ems', 'Wake County EMS Heat Response Division', 'EMS-MED-04');
+        `);
+        console.log('[TigerData] Sample users seeded successfully.');
+      }
+
+      // ── Community Alert Subscriptions Table ──
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS community_alert_subscriptions (
+          id             SERIAL PRIMARY KEY,
+          email          VARCHAR(180) NOT NULL,
+          addresses      JSONB NOT NULL,
+          subscribed_at  TIMESTAMPTZ DEFAULT NOW(),
+          active         BOOLEAN DEFAULT TRUE
+        );
+      `);
+
       isConnected = true;
-      console.log('[TigerData] Schema initialized successfully.');
+      console.log('[TigerData] Schema & authentication tables initialized successfully.');
       return true;
     } finally {
       client.release();
@@ -366,6 +406,129 @@ async function getDiagnostics() {
   }
 }
 
+async function authenticateUser(username, password) {
+  if (!pool && !initPool()) return { success: false, error: 'Database not initialized' };
+
+  try {
+    const client = await pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT id, username, password_hash, full_name, role, department, badge_number FROM heatshield_users WHERE username = $1;',
+        [username?.trim()?.toLowerCase()]
+      );
+
+      if (res.rows.length === 0) {
+        return { success: false, error: 'User not found in municipal registry' };
+      }
+
+      const user = res.rows[0];
+      if (user.password_hash !== password) {
+        return { success: false, error: 'Invalid password credentials' };
+      }
+
+      return {
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          fullName: user.full_name,
+          role: user.role,
+          department: user.department,
+          badgeNumber: user.badge_number
+        }
+      };
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+async function getSampleUsers() {
+  if (!pool && !initPool()) {
+    return [
+      { username: 'planner_sarah', password_hint: 'raleigh2026!', fullName: 'Sarah Jenkins, AICP', role: 'city_planner', department: 'Urban Planning & Heat Equity' },
+      { username: 'planner_marcus', password_hint: 'heatshield!', fullName: 'Marcus Vance, PE', role: 'city_planner', department: 'Capital Infrastructure' },
+      { username: 'ems_dispatch', password_hint: 'wake911!', fullName: 'Dispatcher Ortiz', role: 'emergency_ems', department: 'Wake County 911 Communications' },
+      { username: 'ems_captain_davis', password_hint: 'dispatch2026!', fullName: 'Capt. Ronald Davis', role: 'emergency_ems', department: 'Wake County EMS Heat Division' }
+    ];
+  }
+
+  try {
+    const client = await pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT username, password_hash, full_name, role, department, badge_number FROM heatshield_users ORDER BY role, id;'
+      );
+      return res.rows.map(r => ({
+        username: r.username,
+        password_hint: r.password_hash,
+        fullName: r.full_name,
+        role: r.role,
+        department: r.department,
+        badgeNumber: r.badge_number
+      }));
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    return [];
+  }
+}
+
+async function saveCommunitySubscription(email, addresses) {
+  if (!email || !addresses || !addresses.length) {
+    return { success: false, error: 'Email and at least one address are required' };
+  }
+
+  if (!pool && !initPool()) return { success: false, error: 'Database not initialized' };
+
+  try {
+    const client = await pool.connect();
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      const addressesJson = JSON.stringify(addresses);
+
+      const res = await client.query(
+        `INSERT INTO community_alert_subscriptions (email, addresses, subscribed_at)
+         VALUES ($1, $2, NOW())
+         RETURNING id, email, addresses, subscribed_at;`,
+        [cleanEmail, addressesJson]
+      );
+
+      return {
+        success: true,
+        subscription: res.rows[0],
+        message: `Registered ${addresses.length} monitored location(s) for ${cleanEmail}. Severe heat advisory dispatched.`
+      };
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+async function getCommunitySubscriptions(email) {
+  if (!pool && !initPool()) return [];
+
+  try {
+    const client = await pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT id, email, addresses, subscribed_at FROM community_alert_subscriptions WHERE email = $1 ORDER BY subscribed_at DESC LIMIT 5;',
+        [email.trim().toLowerCase()]
+      );
+      return res.rows;
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    return [];
+  }
+}
+
 module.exports = {
   initPool,
   initSchema,
@@ -374,5 +537,9 @@ module.exports = {
   getLatestTelemetry,
   getTimeBucketTrends,
   getDiagnostics,
-  RALEIGH_STATIONS
+  RALEIGH_STATIONS,
+  authenticateUser,
+  getSampleUsers,
+  saveCommunitySubscription,
+  getCommunitySubscriptions
 };

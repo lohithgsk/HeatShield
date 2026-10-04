@@ -12,6 +12,7 @@ export default function AudioDrawer({
   onClose,
   initialScript = ''
 }) {
+
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState('21m00Tcm4TlvDq8ikWAM');
   const [scriptText, setScriptText] = useState(PRESET_SCRIPTS.emergency);
@@ -83,7 +84,7 @@ export default function AudioDrawer({
     <div className={`action-drawer ${isOpen ? 'open' : ''}`}>
       <div className="drawer-header">
         <div className="drawer-title-group">
-          <Radio size={20} style={{ color: '#c084fc' }} />
+          <Radio size={20} style={{ color: 'var(--semantic-blue)' }} />
           <div>
             <h3 className="drawer-title">ElevenLabs Voice Broadcast</h3>
             <span className="drawer-subtitle">Studio-Quality AI Speech Synthesis</span>
@@ -171,7 +172,7 @@ export default function AudioDrawer({
         {/* Generate Button */}
         <button 
           className="btn-primary-action"
-          style={{ width: '100%', padding: '12px', background: 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)' }}
+          style={{ width: '100%', padding: '12px', background: 'linear-gradient(135deg, var(--semantic-blue) 0%, #7e22ce 100%)' }}
           onClick={handleSynthesize}
           disabled={isSynthesizing}
         >
@@ -183,7 +184,7 @@ export default function AudioDrawer({
         {audioUrl && (
           <div className="audio-player-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#c084fc' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--semantic-blue)' }}>
                 📻 Studio Audio Player
               </span>
               <a 

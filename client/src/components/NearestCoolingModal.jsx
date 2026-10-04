@@ -33,12 +33,12 @@ export default function NearestCoolingModal({
       padding: '20px'
     }}>
       <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)',
-        border: '1px solid rgba(59, 130, 246, 0.35)',
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-default)',
         borderRadius: '16px',
         width: '100%',
         maxWidth: '520px',
-        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)',
+        boxShadow: 'var(--shadow-lg)',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column'

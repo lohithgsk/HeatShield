@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     // Make the dev server reachable from devices on the same Wi-Fi network.
     host: '0.0.0.0',
+    allowedHosts: ['dontgetcooked.cooking'],
     port: 3000,
     proxy: {
       '/api': {

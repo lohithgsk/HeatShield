@@ -7,6 +7,7 @@ export default function AnalyticsDrawer({
   tractsGeoJSON,
   onSelectTract
 }) {
+
   const [searchTerm, setSearchTerm] = useState('');
   const [riskFilter, setRiskFilter] = useState('All');
 

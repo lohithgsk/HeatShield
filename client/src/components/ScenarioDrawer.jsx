@@ -55,6 +55,7 @@ export default function ScenarioDrawer({
   isPlacing,
   setIsPlacing
 }) {
+
   const [selectedHotspot, setSelectedHotspot] = useState(PRESET_HOTSPOTS[0]);
   const [isLoading, setIsLoading] = useState(false);
 

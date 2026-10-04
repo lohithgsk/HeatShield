@@ -87,10 +87,10 @@ export default function CopilotDrawer({
     <div className={`action-drawer ${isOpen ? 'open' : ''}`}>
       <div className="drawer-header">
         <div className="drawer-title-group">
-          <Sparkles size={20} style={{ color: '#60a5fa' }} />
+          <FileText size={20} style={{ color: "var(--semantic-blue)" }} />
           <div>
-            <h3 className="drawer-title">Urban Climate Copilot</h3>
-            <span className="drawer-subtitle">Powered by Google Gemini 3.8 Flash • {persona}</span>
+            <h3 className="drawer-title">Planning & Decision Advisory</h3>
+            <span className="drawer-subtitle">Microclimate Diagnostics & Policy Engine ?• {persona}</span>
           </div>
         </div>
         <button className="btn-close-drawer" onClick={onClose}>
@@ -125,7 +125,7 @@ export default function CopilotDrawer({
             onClick={() => setMode('chat')}
           >
             <MessageSquare size={14} />
-            <span>AI Chat</span>
+            <span>Interactive Query</span>
           </button>
         </div>
 

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Database, RefreshCw, Zap, Activity, Clock, ShieldCheck, ArrowUpRight, Flame, Droplets, Wind, X } from 'lucide-react';
 
 export default function TigerDataModal({ isOpen, onClose }) {

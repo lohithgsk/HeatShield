@@ -11,56 +11,42 @@ export default function Logo({ size = 40 }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: '10px',
-        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-        border: '1px solid rgba(59, 130, 246, 0.4)',
-        boxShadow: '0 0 14px rgba(59, 130, 246, 0.25)'
+        borderRadius: '6px',
+        background: '#131923',
+        border: '1px solid #1d2635'
       }}
     >
       <svg
-        width={size * 0.7}
-        height={size * 0.7}
+        width={size * 0.65}
+        height={size * 0.65}
         viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <defs>
-          <linearGradient id="logoShieldGrad" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#38bdf8" />
-            <stop offset="50%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#ef4444" />
-          </linearGradient>
-          <linearGradient id="logoFlameGrad" x1="16" y1="8" x2="16" y2="24" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#f97316" />
-            <stop offset="100%" stopColor="#ef4444" />
-          </linearGradient>
-        </defs>
-
-        {/* Shield */}
+        {/* Civic Shield Outline */}
         <path
-          d="M16 3L5 7V15C5 21.6 9.7 27.7 16 29C22.3 27.7 27 21.6 27 15V7L16 3Z"
-          stroke="url(#logoShieldGrad)"
-          strokeWidth="2.2"
+          d="M16 4L6 8V15C6 21.2 10.3 26.9 16 28C21.7 26.9 26 21.2 26 15V8L16 4Z"
+          stroke="#475569"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
 
-        {/* Thermometer stem */}
+        {/* Precision Thermal Geometry */}
         <path
           d="M16 9V17"
           stroke="#38bdf8"
-          strokeWidth="2.4"
+          strokeWidth="2"
           strokeLinecap="round"
         />
 
-        {/* Thermometer bulb */}
         <circle
           cx="16"
-          cy="20"
-          r="3"
-          fill="url(#logoFlameGrad)"
-          stroke="#ffffff"
-          strokeWidth="1.2"
+          cy="20.5"
+          r="2.8"
+          fill="#ef4444"
+          stroke="#0c1017"
+          strokeWidth="1"
         />
       </svg>
     </div>
