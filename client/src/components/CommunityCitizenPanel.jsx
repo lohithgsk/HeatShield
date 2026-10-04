@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MapPin, Navigation, Home, AlertTriangle, Compass, Bookmark } from 'lucide-react';
+import ForecastPredictionCard from './ForecastPredictionCard';
 
 const PRESET_ADDRESSES = [
   { name: '505 MLK Jr Blvd (Chavis Park)', lat: 35.7712, lon: -78.6271 },
@@ -218,6 +219,10 @@ export default function CommunityCitizenPanel({
             </div>
           </div>
         )}
+
+        <div className="divider" />
+
+        <ForecastPredictionCard audience="community" />
 
         <div className="divider" />
 

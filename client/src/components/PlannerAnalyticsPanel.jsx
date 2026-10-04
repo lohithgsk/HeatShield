@@ -10,6 +10,7 @@ import {
   History,
   Zap
 } from 'lucide-react';
+import ForecastPredictionCard from './ForecastPredictionCard';
 
 export default function PlannerAnalyticsPanel({
   activeMetric,
@@ -129,6 +130,10 @@ export default function PlannerAnalyticsPanel({
             {isWarRoomActive ? 'Open War Room Command' : 'Launch Heatwave War Room'}
           </button>
         </div>
+
+        <div className="divider" />
+
+        <ForecastPredictionCard audience="city" />
 
         <div className="divider" />
 
