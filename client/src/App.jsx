@@ -7,6 +7,7 @@ import ScenarioDrawer from './components/ScenarioDrawer';
 import CopilotDrawer from './components/CopilotDrawer';
 import AudioDrawer from './components/AudioDrawer';
 import AnalyticsDrawer from './components/AnalyticsDrawer';
+import ForecastDrawer from './components/ForecastDrawer';
 import NearestCoolingModal from './components/NearestCoolingModal';
 import TigerDataModal from './components/TigerDataModal';
 import ReportHeatAlertModal from './components/ReportHeatAlertModal';
@@ -358,6 +359,7 @@ export default function App() {
         liveWeather={liveWeather}
         onFindNearest={handleFindNearest}
         onOpenTigerData={() => setShowTigerModal(true)}
+        onOpenForecast={() => setActiveDrawer(activeDrawer === 'forecast' ? null : 'forecast')}
         alerts={alerts}
         onOpenReportModal={() => setShowReportModal(true)}
         // Replay & Heatmap props
@@ -536,14 +538,12 @@ export default function App() {
           />
         )}
 
-        {authSession.role === 'city_planner' && (
-          <AnalyticsDrawer
-            isOpen={activeDrawer === 'analytics'}
-            onClose={() => setActiveDrawer(null)}
-            tractsGeoJSON={tractsGeoJSON}
-            onSelectTract={(t) => { setSelectedTract(t); setActiveDrawer(null); }}
-          />
-        )}
+        <AnalyticsDrawer
+          isOpen={activeDrawer === 'analytics'}
+          onClose={() => setActiveDrawer(null)}
+          tractsGeoJSON={tractsGeoJSON}
+          onSelectTract={(t) => { setSelectedTract(t); setActiveDrawer(null); }}
+        />
 
         <NearestCoolingModal
           isOpen={showNearestModal}
