@@ -1,234 +1,111 @@
-# 🌡️ HeatShield — Raleigh Urban Climate Decision Hub
+# HeatShield — Raleigh Urban Climate Decision Hub
 
-> **Find the heat. Understand the risk. Fund the fix.** ❄️🌳💧
+> **Find the heat. Understand the risk. Fund the fix.**
 
-HeatShield is a full-stack **urban climate decision-support platform** built for **Raleigh, North Carolina**.
+HeatShield is a full-stack urban climate decision-support platform built for Raleigh, North Carolina.
 
-Instead of just showing where it's hot, HeatShield connects **heat exposure + demographic vulnerability + cooling accessibility + intervention planning + AI recommendations + real-world funding** into one platform.
+Instead of solely identifying high-temperature zones, HeatShield integrates heat exposure, demographic vulnerability, cooling accessibility, intervention planning, AI-driven recommendations, and decentralized real-world funding into a unified platform.
 
----
-
-## 🚨 What Problem Are We Solving?
-
-Extreme heat doesn't affect every neighborhood equally.
-
-HeatShield helps answer:
-
-> **Where is the heat? Who is vulnerable? Who lacks access to cooling? What should we build? And how can we fund it?**
+<p align="center">
+  <img src="https://github.com/lohithgsk/HeatShield/raw/main/docs/images/HeatShield.png" alt="HeatShield Logo" width="100%" />
+</p>
 
 ---
 
-# ⚡ What HeatShield Does
+## What Problem Are We Solving?
 
-### 🗺️ 1. Interactive Heat & Vulnerability Map
+Extreme heat events do not impact every neighborhood equally. HeatShield addresses critical municipal inquiries:
 
-Analyze **248 Raleigh Census Tracts** using:
-
-- 🌡️ Heat Vulnerability Index (HVI)
-- ☀️ Surface temperature
-- 🌳 Tree canopy & canopy deficit
-- 🏙️ Impervious surface
-- 💰 Poverty rate
-- 👵 Senior population
-
-The map also contains **746 OpenStreetMap cooling resources** including libraries, community centers, pools, parks, and greenways.
-
-### 🔴 Heat Dead-Zone Detection
-
-HeatShield automatically identifies areas where:
-
-```text
-High Heat Vulnerability
-        +
-No cooling resource within ~800m
-        ↓
-🔴 CRITICAL HEAT DEAD ZONE
-```
+- Where is the localized heat concentrated?
+- Which demographics are most vulnerable?
+- Which populations lack physical access to cooling infrastructure?
+- What infrastructure should be constructed, and where?
+- How can these projects be financed transparently?
 
 ---
 
-### 📍 2. Drop an Intervention
+## Core Features
 
-Users can place hypothetical interventions directly on the map and simulate their impact.
+### 1. Interactive Heat & Vulnerability Map
 
-Available interventions include:
+Provides analysis across **248 Raleigh Census Tracts** utilizing metrics including:
 
-| Intervention | Walk Shed | Cost |
-|---|---:|---:|
-| ❄️ Cooling Center | 800m | $350k |
-| 🌳 Pocket Park / Urban Forest | 600m | $180k |
-| 💧 Splash Pad / Aquatics | 700m | $240k |
-| 🚏 Shaded Transit + Hydration Hub | 500m | $95k |
+- Heat Vulnerability Index (HVI)
+- Surface temperature gradients
+- Tree canopy coverage and canopy deficit analysis
+- Impervious surface density
+- Poverty rate distribution
+- Senior population concentration
 
-The scenario engine calculates:
+The mapping interface incorporates **746 OpenStreetMap cooling resources**, covering libraries, community centers, public pools, parks, and greenways.
 
-- 👥 People protected
-- 🔴 Dead zones eliminated
-- 🚶 Accessibility improvement
-- 💵 Cost per person
-- 📊 Municipal ROI score
+### Heat Dead-Zone Detection
 
----
+The platform automatically isolates critical heat dead zones defined by high heat vulnerability coupled with a lack of cooling resources within an 800-meter radius.
 
-# 🤖 3. Urban Climate Copilot
+### 2. Scenario-Based Intervention Planner
 
-Powered by **Google Gemini**, our Climate Copilot turns map data into actionable recommendations.
+Users can deploy hypothetical urban interventions onto the map to simulate localized impact.
 
-It can generate:
+| Intervention Type | Target Walk Shed | Estimated Cost |
+| :--- | :---: | :---: |
+| Cooling Center | 800m | $350,000 |
+| Pocket Park / Urban Forest | 600m | $180,000 |
+| Splash Pad / Aquatics | 700m | $240,000 |
+| Shaded Transit & Hydration Hub | 500m | $95,000 |
 
-- 🌡️ Tract-level climate diagnosis
-- 🚶 Pedestrian dead-zone analysis
-- 🎯 Recommended interventions
-- 🏛️ City Council action items
-- 📑 Executive memorandums
-- 💬 Conversational climate Q&A
+The scenario engine computes key performance metrics:
 
-So instead of staring at a map, city officials can simply ask:
+- Total population protected
+- Critical dead zones eliminated
+- Pedestrian accessibility improvements
+- Cost per person protected
+- Municipal ROI score
 
-> *"Why should we prioritize this neighborhood?"*
+### 3. Urban Climate Copilot
 
----
+Powered by **Google Gemini**, the Climate Copilot processes spatial map data to deliver automated operational recommendations, including:
 
-# 🔊 4. Executive Audio Briefings
+- Tract-level climate diagnostics
+- Pedestrian dead-zone evaluations
+- Optimized intervention siting
+- City Council action items and executive memorandums
+- Conversational climate intelligence Q&A
 
-Using **ElevenLabs**, HeatShield converts climate insights into realistic executive audio briefings.
+### 4. Executive Audio Briefings
+
+Integrated with **ElevenLabs**, HeatShield transforms climate data analytics into synthesized executive audio briefings.
 
 Templates include:
 
-- 🚨 Emergency Heatwave Advisory
-- 🏛️ City Council Briefing
-- 🌳 Tree Canopy Equity Spotlight
+- Emergency heatwave advisories
+- City council briefings
+- Tree canopy equity spotlights
 
-Users can generate, play, visualize, and download the briefing directly from the dashboard.
+### 5. Decentralized Funding — Powered by Solana
 
----
+HeatShield acts as a coordination and financial settlement layer. When high-priority intervention sites are selected, users can connect a Solana wallet, select a funding tier, and sign transactions to finance the infrastructure directly.
 
-# 💰 5. Fund the Fix — Powered by Solana
+Funding actions record permanent on-chain data mapped to projected beneficiaries and access improvements.
 
-This is where HeatShield goes beyond a traditional climate dashboard.
+### 6. Heat Relief Impact Ledger
 
-Normally, a system might say:
-
-> **"This intervention could help 3,200 people."**
-
-We ask:
-
-> **"Can someone fund it?"**
-
-When a high-priority area is selected, HeatShield creates an intervention opportunity:
-
-```text
-🔴 HEAT INTERVENTION OPPORTUNITY
-
-Southeast Raleigh
-Heat Exposure: HIGH
-Vulnerability: HIGH
-Cooling Access: LOW
-
-3,240 residents affected
-1,870 vulnerable residents
-
-Estimated Cost: $5,000
-
-[ ❄️ FUND THIS INTERVENTION ]
-```
-
-Users can connect a Solana wallet, choose an amount, and sign the transaction.
-
-```text
-$5    $10    $25    $50
-
-≈ 0.XX SOL
-
-[ CONNECT WALLET ]
-
-        ↓
-
-[ FUND WITH SOLANA ]
-```
-
-After confirmation:
-
-```text
-✅ INTERVENTION FUNDED
-
-Tract: Raleigh-042
-Intervention: Cooling Center
-Amount: 0.XX SOL
-
-Projected Impact:
-+2,740 people within 10-min access
-
-[ VIEW TRANSACTION ]
-```
-
-### 🔗 Impact Memo
-
-The funding record can be associated with an intervention:
-
-```text
-INTERVENTION
-Cooling Center
-
-LOCATION
-Raleigh Tract 042
-
-PROJECTED BENEFICIARIES
-2,740
-
-ACCESS IMPROVEMENT
-+18%
-
-FUNDER
-Wallet: 8x...
-```
-
-This makes Solana a **funding + coordination layer**, rather than a decorative blockchain integration.
+All funded interventions feed directly into a transparent public impact ledger, establishing a verifiable audit trail from climate need to financial execution and projected social impact.
 
 ---
 
-# 🌎 6. Heat Relief Impact Ledger
+## Technology Stack
 
-All funded interventions can be surfaced in a transparent impact ledger:
-
-```text
-┌─────────────────────────────────────────────┐
-│           🌎 HEAT RELIEF LEDGER             │
-├─────────────────────────────────────────────┤
-│ ❄️ Cooling Center      0.50 SOL   2,740 ppl │
-│ 🌳 Shade Intervention  0.20 SOL   1,120 ppl │
-│ 💧 Water Station       0.15 SOL     830 ppl │
-│ ❄️ Cooling Center      0.75 SOL   4,210 ppl │
-├─────────────────────────────────────────────┤
-│ TOTAL FUNDING        1.60 SOL               │
-│ PEOPLE REACHED       8,900                  │
-└─────────────────────────────────────────────┘
-```
-
-Now the blockchain provides a **transparent trail from climate need → intervention → funding → projected impact.**
+- **Frontend:** React 19, Vite, Leaflet, React-Leaflet, Lucide, Vanilla CSS
+- **Backend:** Node.js, Express 5, Axios, Dotenv
+- **AI & Voice:** Google Gemini, ElevenLabs
+- **Blockchain:** Solana, wallet-based transaction signing, on-chain intervention ledgers
+- **Mobile Support:** Expo Go
+- **Data Sources:** 248 Census Tracts, 746 OpenStreetMap cooling assets, Raleigh Municipal Boundary
 
 ---
 
-# 🧩 Tech Stack
-
-### Frontend
-**React 19 · Vite · Leaflet · React-Leaflet · Lucide · Vanilla CSS**
-
-### Backend
-**Node.js · Express 5 · Axios · Dotenv**
-
-### AI & Voice
-**Google Gemini · ElevenLabs**
-
-### Blockchain
-**Solana · Wallet-based transaction signing · On-chain intervention records**
-
-### Data
-**248 Census Tracts · 746 OSM Cooling Assets · Raleigh Municipal Boundary**
-
----
-
-# 📁 Project Structure
+## Project Directory Structure
 
 ```text
 wolfhacks/
@@ -266,58 +143,70 @@ wolfhacks/
 
 ---
 
-# 🚀 Run Locally
+# Local Installation & Execution
+
+## Prerequisites
+
+- Node.js installed on your system.
+- For mobile application usage, setting up Expo Go is mandatory (create an account on Expo Go).
+
+## 1. Install Dependencies
+
+Run the installation command from the root directory:
 
 ```bash
 npm install
-npm start
 ```
 
-Or run the React development server:
+## 2. Configure Environment Variables
 
-```bash
-npm run client
-```
-
-### Environment Variables
+Create a `.env` file in the root directory and populate your API credentials:
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
 ELEVENLABS_API_KEY=your_elevenlabs_api_key
 ```
 
-Solana wallet configuration is used for user-signed funding transactions.
+> **Note:** Never commit private keys or seed phrases.
 
-> 🔐 Never commit private keys or seed phrases.
+## 3. Run the Backend Server
+
+To execute the backend server, you can either run the following command from the root of the package:
+
+```bash
+node server
+```
+
+Or navigate into the server directory and execute:
+
+```bash
+cd server
+node index.js
+```
+
+## 4. Run the Frontend Application
+
+To start the React development client from the root directory:
+
+```bash
+npm run dev
+```
+
+## 5. Run the Mobile Application
+
+Ensure your Expo Go account is configured, then run:
+
+```bash
+npm run start:lan:clear
+```
 
 ---
 
-# 🧠 The Big Picture
+## ⚠️ AI Usage Declaration
 
-HeatShield connects the full climate-response loop:
+HeatShield was developed with the assistance of generative AI tools.
 
-```text
-🌡️ DETECT HEAT
-      ↓
-👥 FIND VULNERABILITY
-      ↓
-🚶 FIND COOLING GAPS
-      ↓
-📍 PLAN INTERVENTION
-      ↓
-📊 SIMULATE IMPACT
-      ↓
-🤖 AI RECOMMENDATION
-      ↓
-💰 FUND THE FIX
-      ↓
-🔗 TRACK IMPACT
-```
+- **Google Gemini:** Used for the **Urban Climate Copilot**, including spatial data analysis, climate diagnostics, intervention recommendations, and conversational climate intelligence.
+- **OpenAI Codex:** Used during development for **project ideation, architectural brainstorming, and initial code/project skeleton generation**.
 
-### **HeatShield doesn't just show the problem.**
-
-## **It helps decide what to do — and gives people a way to fund it.** 🌎❄️
-
-**Built for Raleigh, NC 🇺🇸**
-
-**React · Node.js · Leaflet · Gemini · ElevenLabs · Solana**
+AI-generated suggestions and code were reviewed, adapted, and integrated by the development team. The final implementation, design decisions, testing, data integration, and project execution were performed and validated by the team.
