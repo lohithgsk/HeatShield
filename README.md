@@ -323,27 +323,6 @@ curl http://localhost:5000/api/kpis
 
 Then confirm the browser loads <http://localhost:3000> and that the map, cooling lookup, and optional drawers behave as expected.
 
-## Troubleshooting
-
-### The browser shows API errors
-
-Confirm Express is running on port 5000 and Vite is running on port 3000. Check `http://localhost:5000/api/health`. If using a different API port, update the proxy in `client/vite.config.js` and the mobile API URL as appropriate.
-
-### Forecasts are unavailable
-
-Start Flask, verify `/health`, and ensure the active Python environment has scikit-learn `1.7.1`. If running production mode, configure `TIGER_DATA_URL`; production intentionally does not use sample telemetry.
-
-### The mobile app cannot reach the API
-
-Use the computer’s LAN IP in `mobile/.env`, keep the phone and computer on the same network, allow Node through the firewall, and use `npm run start:lan`. Do not use `localhost` from a physical phone.
-
-### Walking routes fall back to a straight line
-
-The server invokes `services/route_service.py` and reads `data/raleigh_central_walk.graphml`. Install the Python dependencies from `requirements.txt`, ensure `PYTHON_BIN` points to the intended interpreter, and confirm the graph file exists.
-
-### Gemini or ElevenLabs features are disabled
-
-Set the matching key in the root `.env`, restart Express, and check `/api/health`. The rest of the application remains usable without either key.
 
 ## License
 
