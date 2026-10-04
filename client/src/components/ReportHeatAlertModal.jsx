@@ -26,7 +26,7 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
         description: description.trim() || 'Citizen reported extreme heat vulnerability.'
       };
 
-      const res = await fetch('http://localhost:5000/api/alerts', {
+      const res = await fetch('/api/alerts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -49,8 +49,7 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
     <div className="modal-backdrop" onClick={onClose} style={{
       position: 'fixed',
       inset: 0,
-      backgroundColor: 'rgba(5, 10, 20, 0.82)',
-      backdropFilter: 'blur(8px)',
+      backgroundColor: 'rgba(29, 41, 50, 0.42)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -63,18 +62,18 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
         style={{
           width: '100%',
           maxWidth: '540px',
-          backgroundColor: '#0f172a',
-          border: '1px solid rgba(239, 68, 68, 0.4)',
-          borderRadius: '16px',
+          backgroundColor: 'var(--bg-surface)',
+          border: '1px solid var(--border-default)',
+          borderRadius: '8px',
           boxShadow: 'var(--shadow-lg)',
-          color: '#f8fafc',
+          color: 'var(--text-primary)',
           overflow: 'hidden'
         }}
       >
         {/* Header */}
         <div style={{
           padding: '18px 22px',
-          borderBottom: '1px solid #1e293b',
+          borderBottom: '1px solid var(--border-default)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -95,12 +94,12 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
             </div>
             <div>
               <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>Report Heat Hazard / Request Help</h2>
-              <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>
+              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                 Directly feeds the Raleigh Emergency Heat Triage console
               </p>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
             <X size={20} />
           </button>
         </div>
@@ -108,8 +107,8 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
         {success ? (
           <div style={{ padding: '40px 24px', textAlign: 'center' }}>
             <CheckCircle2 size={48} color="#22c55e" style={{ margin: '0 auto 12px' }} />
-            <h3 style={{ margin: '0 0 6px', fontSize: '1.2rem', color: '#4ade80' }}>Alert Broadcast to Emergency Dispatch!</h3>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>
+            <h3 style={{ margin: '0 0 6px', fontSize: '1.2rem', color: 'var(--semantic-green)' }}>Alert Broadcast to Emergency Dispatch!</h3>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               Your distress report has been logged and dispatched to Raleigh emergency responders.
             </p>
           </div>
@@ -118,7 +117,7 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
             
             {/* Category */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 Issue Category
               </label>
               <select
@@ -128,9 +127,9 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
                   width: '100%',
                   padding: '9px 12px',
                   borderRadius: '8px',
-                  backgroundColor: '#1e293b',
-                  border: '1px solid #334155',
-                  color: '#f8fafc',
+                  backgroundColor: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-default)',
+                  color: 'var(--text-primary)',
                   fontSize: '0.88rem'
                 }}
               >
@@ -144,13 +143,13 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
 
             {/* Urgency */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 Urgency Level
               </label>
               <div style={{ display: 'flex', gap: '8px' }}>
                 {[
                   { id: 'CRITICAL', label: 'Critical (Immediate)', color: '#ef4444' },
-                  { id: 'HIGH', label: 'High Priority', color: '#f97316' },
+                  { id: 'HIGH', label: 'High Priority', color: 'var(--semantic-amber)' },
                   { id: 'MODERATE', label: 'Moderate', color: '#eab308' }
                 ].map(tier => (
                   <button
@@ -163,9 +162,9 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
                       borderRadius: '8px',
                       fontSize: '0.78rem',
                       fontWeight: 600,
-                      backgroundColor: urgency === tier.id ? tier.color : '#1e293b',
-                      color: urgency === tier.id ? '#ffffff' : '#94a3b8',
-                      border: `1px solid ${urgency === tier.id ? tier.color : '#334155'}`,
+                      backgroundColor: urgency === tier.id ? tier.color : 'var(--bg-elevated)',
+                      color: urgency === tier.id ? '#ffffff' : 'var(--text-secondary)',
+                      border: `1px solid ${urgency === tier.id ? tier.color : 'var(--border-default)'}`,
                       cursor: 'pointer',
                       transition: 'all 0.15s ease'
                     }}
@@ -178,11 +177,11 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
 
             {/* Location / Address */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 Location / Address
               </label>
               <div style={{ position: 'relative' }}>
-                <MapPin size={16} color="#38bdf8" style={{ position: 'absolute', left: '12px', top: '11px' }} />
+                <MapPin size={16} color="var(--semantic-blue)" style={{ position: 'absolute', left: '12px', top: '11px' }} />
                 <input
                   type="text"
                   value={address}
@@ -193,9 +192,9 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
                     width: '100%',
                     padding: '9px 12px 9px 36px',
                     borderRadius: '8px',
-                    backgroundColor: '#1e293b',
-                    border: '1px solid #334155',
-                    color: '#f8fafc',
+                    backgroundColor: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)',
                     fontSize: '0.88rem'
                   }}
                 />
@@ -204,7 +203,7 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
 
             {/* Reporter Name */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 Your Name / Organization (Optional)
               </label>
               <input
@@ -216,9 +215,9 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
                   width: '100%',
                   padding: '9px 12px',
                   borderRadius: '8px',
-                  backgroundColor: '#1e293b',
-                  border: '1px solid #334155',
-                  color: '#f8fafc',
+                  backgroundColor: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-default)',
+                  color: 'var(--text-primary)',
                   fontSize: '0.88rem'
                 }}
               >
@@ -227,7 +226,7 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
 
             {/* Description */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 Situation Details
               </label>
               <textarea
@@ -240,9 +239,9 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
                   width: '100%',
                   padding: '9px 12px',
                   borderRadius: '8px',
-                  backgroundColor: '#1e293b',
-                  border: '1px solid #334155',
-                  color: '#f8fafc',
+                  backgroundColor: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-default)',
+                  color: 'var(--text-primary)',
                   fontSize: '0.88rem',
                   resize: 'none'
                 }}
@@ -259,8 +258,8 @@ export default function ReportHeatAlertModal({ isOpen, onClose, userLocation, us
                   padding: '10px',
                   borderRadius: '8px',
                   backgroundColor: 'transparent',
-                  border: '1px solid #475569',
-                  color: '#94a3b8',
+                  border: '1px solid var(--border-medium)',
+                  color: 'var(--text-secondary)',
                   fontWeight: 600,
                   fontSize: '0.85rem',
                   cursor: 'pointer'

@@ -225,7 +225,7 @@ export default function PlannerAnalyticsPanel({
                   onChange={(e) => setShowHeatmap(e.target.checked)}
                 />
                 <span className="toggle-slider" style={{ background: showHeatmap ? '#ef4444' : undefined, borderColor: showHeatmap ? '#ef4444' : undefined }} />
-                <span className="toggle-label" style={{ color: showHeatmap ? '#f87171' : undefined, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span className="toggle-label" style={{ color: showHeatmap ? 'var(--semantic-red)' : undefined, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
                   <Flame size={13} />
                   Live Thermal Heatmap
                 </span>
@@ -265,7 +265,7 @@ export default function PlannerAnalyticsPanel({
         {/* Historical Replay Trigger Card */}
         <div style={{ 
           padding: '10px', 
-          background: isHistoricalReplayActive ? 'rgba(245, 158, 11, 0.12)' : 'rgba(255, 255, 255, 0.03)', 
+          background: isHistoricalReplayActive ? 'var(--semantic-amber-bg)' : 'var(--bg-surface)',
           borderRadius: 'var(--radius-sm)', 
           border: `1px solid ${isHistoricalReplayActive ? 'rgba(245, 158, 11, 0.4)' : 'var(--border-subtle)'}` 
         }}>
@@ -275,7 +275,7 @@ export default function PlannerAnalyticsPanel({
               fontWeight: 700, 
               textTransform: 'uppercase', 
               letterSpacing: '0.06em', 
-              color: isHistoricalReplayActive ? '#fbbf24' : 'var(--text-secondary)', 
+              color: isHistoricalReplayActive ? 'var(--semantic-amber-lt)' : 'var(--text-secondary)',
               display: 'flex', 
               alignItems: 'center', 
               gap: 5 
@@ -327,7 +327,7 @@ export default function PlannerAnalyticsPanel({
         {/* Selected Tract Detail */}
         {selectedTract ? (
           <div className={`tract-card ${selectedTract.is_dead_zone ? 'dead-zone' : 'normal'}`}>
-            <div style={{ marginBottom: 8 }}>
+            <div className="tract-card-heading">
               <div className="tract-name">
                 {selectedTract.neighborhood || selectedTract.neighborhood_name || `Census Tract ${selectedTract.name || selectedTract.geoid}`}
               </div>
@@ -338,33 +338,33 @@ export default function PlannerAnalyticsPanel({
               <div className="tract-stat">
                 <span className="stat-label">{isHistoricalReplayActive ? 'Modeled HVI' : 'HVI Score'}</span>
                 <span className="stat-value" style={{
-                  color: (selectedTract.modeled_hvi || selectedTract.heat_vulnerability_index) >= 55 ? 'var(--red-lt)' : 'var(--green-lt)'
+                  color: (selectedTract.modeled_hvi ?? selectedTract.heat_vulnerability_index) >= 55 ? 'var(--semantic-red)' : 'var(--semantic-green)'
                 }}>
-                  {selectedTract.modeled_hvi || selectedTract.heat_vulnerability_index} / 100
+                  {selectedTract.modeled_hvi ?? selectedTract.heat_vulnerability_index} <span className="stat-unit">/ 100</span>
                 </span>
               </div>
               <div className="tract-stat">
                 <span className="stat-label">{isHistoricalReplayActive ? 'Modeled Temp' : 'Surface Temp'}</span>
                 <span className="stat-value" style={{
-                  color: isHistoricalReplayActive ? '#fbbf24' : undefined
+                  color: isHistoricalReplayActive ? 'var(--semantic-amber-lt)' : undefined
                 }}>
-                  {selectedTract.modeled_temp_f || selectedTract.surface_temp_f}°F
+                  {selectedTract.modeled_temp_f ?? selectedTract.surface_temp_f}<span className="stat-unit">°F</span>
                 </span>
               </div>
               <div className="tract-stat">
                 <span className="stat-label">Tree Canopy</span>
-                <span className="stat-value">{selectedTract.canopy_cover_pct}%</span>
+                <span className="stat-value">{selectedTract.canopy_cover_pct}<span className="stat-unit">%</span></span>
               </div>
               <div className="tract-stat">
                 <span className="stat-label">Impervious</span>
-                <span className="stat-value">{selectedTract.impervious_pct}%</span>
+                <span className="stat-value">{selectedTract.impervious_pct}<span className="stat-unit">%</span></span>
               </div>
             </div>
 
             {selectedTract.is_dead_zone && (
               <div className="dead-zone-badge">
                 <AlertTriangle size={13} />
-                <span>Priority Dead Zone · {(selectedTract.unserved_vulnerable_pop || 1132).toLocaleString()} unserved</span>
+                <span>Priority Dead Zone <span aria-hidden="true">·</span> {(selectedTract.unserved_vulnerable_pop ?? 1132).toLocaleString()} unserved</span>
               </div>
             )}
 

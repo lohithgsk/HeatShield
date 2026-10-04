@@ -30,6 +30,8 @@ export default function LandingPage({
   sampleUsers = [],
   onCloseToMap
 }) {
+  const currentTemperature = liveWeather?.temperature_f ?? liveWeather?.temp_f;
+
   // Operational Staff Tab ('planner' | 'ems')
   const [staffTab, setStaffTab] = useState('planner');
 
@@ -113,7 +115,8 @@ export default function LandingPage({
       setSubscribeSuccess({
         count: validAddresses.length,
         email: email.trim(),
-        message: data.message
+        message: data.message,
+        emailDelivery: data.emailDelivery
       });
 
       setTimeout(() => {
@@ -216,7 +219,9 @@ export default function LandingPage({
               <span className="pill-text">Live Telemetry</span>
             </div>
             <div className="landing-pill">
-              <span className="pill-text">{liveWeather?.temp_f ?? 78.4}°F | Normal Advisory</span>
+              <span className="pill-text">
+                {currentTemperature != null ? `${currentTemperature}°F` : 'Temperature unavailable'} | Live Conditions
+              </span>
             </div>
           </div>
 
@@ -281,7 +286,9 @@ export default function LandingPage({
                   <span className="hero-metric-lbl">Active Cooling Centers</span>
                 </div>
                 <div className="hero-metric">
-                  <span className="hero-metric-val">{liveWeather?.temp_f ?? 78.4}°F</span>
+                  <span className="hero-metric-val">
+                    {currentTemperature != null ? `${currentTemperature}°F` : '--'}
+                  </span>
                   <span className="hero-metric-lbl">Current City Temp</span>
                 </div>
                 <div className="hero-metric">
@@ -297,6 +304,8 @@ export default function LandingPage({
             <button
               type="button"
               className="accordion-toggle-btn"
+              aria-expanded={showAddressAlerts}
+              aria-controls="community-alert-registration"
               onClick={() => setShowAddressAlerts(!showAddressAlerts)}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -309,37 +318,46 @@ export default function LandingPage({
             </button>
 
             {showAddressAlerts && (
-              <div className="accordion-content">
+              <div className="accordion-content" id="community-alert-registration">
                 <p className="accordion-desc">
-                  Save your home, workplace, or family addresses to receive automated notifications when dangerous heat indices impact your specific neighborhood microclimate.
+                  Register home, work, or family locations for heat monitoring. Email alert delivery is not configured yet; this form saves your registration only.
                 </p>
 
                 {communityError && (
-                  <div className="portal-alert error" style={{ marginBottom: 12 }}>
+                  <div className="portal-alert error community-form-alert" role="alert">
                     <AlertCircle size={14} />
                     <span>{communityError}</span>
                   </div>
                 )}
 
                 {subscribeSuccess ? (
-                  <div className="portal-alert success">
+                  <div className="portal-alert success community-form-alert" role="status">
                     <CheckCircle2 size={16} />
                     <div>
-                      <strong>Advisory Registration Active</strong>
-                      <p>Monitoring {subscribeSuccess.count} address(es) for {subscribeSuccess.email}. Launching map...</p>
+                      <strong>Address registration saved</strong>
+                      <p>
+                        {subscribeSuccess.count} location(s) saved for {subscribeSuccess.email}.{' '}
+                        {subscribeSuccess.emailDelivery?.status === 'not_configured'
+                          ? 'Email advisories are not being sent yet.'
+                          : 'Email delivery status is unavailable.'}{' '}
+                        Opening the map...
+                      </p>
                     </div>
                   </div>
                 ) : (
-                  <form onSubmit={handleCommunitySubscribeAndLaunch}>
+                  <form className="community-registration-form" onSubmit={handleCommunitySubscribeAndLaunch}>
                     <div className="form-group">
-                      <label className="input-label">
+                      <label className="input-label" htmlFor="community-alert-email">
                         <Mail size={12} /> Email for Heat Advisories
                       </label>
                       <input
+                        id="community-alert-email"
                         type="email"
                         className="landing-input"
                         placeholder="resident@raleighnc.gov"
                         value={email}
+                        autoComplete="email"
+                        required
                         onChange={(e) => setEmail(e.target.value)}
                       />
                     </div>
@@ -352,6 +370,7 @@ export default function LandingPage({
                         <button
                           type="button"
                           className="btn-text-action"
+                          disabled={subscribing}
                           onClick={handleAddAddressRow}
                         >
                           <Plus size={12} /> Add Location
@@ -361,24 +380,36 @@ export default function LandingPage({
                       <div className="address-rows-list">
                         {addresses.map((addr) => (
                           <div key={addr.id} className="address-input-row">
+                            <label className="visually-hidden" htmlFor={`community-address-label-${addr.id}`}>
+                              Location label
+                            </label>
                             <input
+                              id={`community-address-label-${addr.id}`}
                               type="text"
                               className="landing-input address-label-input"
                               placeholder="Label (Home, Work, Parents)"
                               value={addr.label}
+                              disabled={subscribing}
                               onChange={(e) => handleUpdateAddress(addr.id, 'label', e.target.value)}
                             />
+                            <label className="visually-hidden" htmlFor={`community-address-value-${addr.id}`}>
+                              Street address
+                            </label>
                             <input
+                              id={`community-address-value-${addr.id}`}
                               type="text"
                               className="landing-input address-full-input"
                               placeholder="Street Address in Raleigh, NC"
                               value={addr.address}
+                              disabled={subscribing}
                               onChange={(e) => handleUpdateAddress(addr.id, 'address', e.target.value)}
                             />
                             {addresses.length > 1 && (
                               <button
                                 type="button"
                                 className="btn-icon-danger"
+                                aria-label={`Remove ${addr.label || 'location'}`}
+                                disabled={subscribing}
                                 onClick={() => handleRemoveAddress(addr.id)}
                               >
                                 <Trash2 size={14} />
@@ -395,6 +426,7 @@ export default function LandingPage({
                             key={idx}
                             type="button"
                             className="preset-chip"
+                            disabled={subscribing}
                             onClick={() => handleSelectPreset(p)}
                           >
                             + {p.label.split('/')[0]}
@@ -407,7 +439,7 @@ export default function LandingPage({
                       type="submit"
                       disabled={subscribing}
                       className="btn btn-primary"
-                      style={{ width: '100%', marginTop: 8 }}
+                      style={{ width: '100%' }}
                     >
                       {subscribing ? 'Saving to Database...' : 'Save Addresses & Open Map'}
                     </button>
@@ -604,7 +636,7 @@ export default function LandingPage({
       <footer className="landing-footer-strip">
         <div className="footer-stat">
           <span className="footer-label">Telemetry Hypertable:</span>
-          <span className="footer-val">Timescale Tiger Data (Active)</span>
+          <span className="footer-val">Timescale Sensor Telemetry (Active)</span>
         </div>
         <div className="footer-stat">
           <span className="footer-label">Geospatial Cartography:</span>

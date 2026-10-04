@@ -14,9 +14,9 @@ export default function TigerDataModal({ isOpen, onClose }) {
     setLoading(true);
     try {
       const [resStatus, resLive, resTrends] = await Promise.all([
-        fetch('http://localhost:5000/api/tiger/status').then(r => r.json()),
-        fetch('http://localhost:5000/api/tiger/live').then(r => r.json()),
-        fetch('http://localhost:5000/api/tiger/trends').then(r => r.json())
+        fetch('/api/tiger/status').then(r => r.json()),
+        fetch('/api/tiger/live').then(r => r.json()),
+        fetch('/api/tiger/trends').then(r => r.json())
       ]);
       setStatus(resStatus);
       setTelemetry(resLive);
@@ -40,7 +40,7 @@ export default function TigerDataModal({ isOpen, onClose }) {
   const handleIngestNow = async () => {
     setIngesting(true);
     try {
-      const res = await fetch('http://localhost:5000/api/tiger/ingest', { method: 'POST' });
+      const res = await fetch('/api/tiger/ingest', { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         await fetchData();
@@ -63,8 +63,7 @@ export default function TigerDataModal({ isOpen, onClose }) {
     <div className="modal-backdrop" onClick={onClose} style={{
       position: 'fixed',
       inset: 0,
-      backgroundColor: 'rgba(5, 10, 20, 0.78)',
-      backdropFilter: 'blur(8px)',
+      backgroundColor: 'rgba(29, 41, 50, 0.42)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -78,62 +77,62 @@ export default function TigerDataModal({ isOpen, onClose }) {
           width: '100%',
           maxWidth: '920px',
           maxHeight: '90vh',
-          backgroundColor: '#0f172a',
-          border: '1px solid rgba(251, 146, 60, 0.35)',
-          borderRadius: '16px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 35px rgba(249, 115, 22, 0.15)',
+          backgroundColor: 'var(--bg-surface)',
+          border: '1px solid var(--border-default)',
+          borderRadius: '8px',
+          boxShadow: 'var(--shadow-lg)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          color: '#f8fafc',
-          fontFamily: 'inherit'
+          color: 'var(--text-primary)',
+          fontFamily: 'var(--font-sans)'
         }}
       >
         {/* Header */}
         <div style={{
           padding: '18px 24px',
-          borderBottom: '1px solid #1e293b',
+          borderBottom: '1px solid var(--border-default)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(90deg, rgba(234, 88, 12, 0.15) 0%, rgba(15, 23, 42, 0.8) 100%)'
+          background: 'var(--bg-surface)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
               width: '42px',
               height: '42px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+              borderRadius: '8px',
+              background: 'var(--semantic-blue)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(234, 88, 12, 0.4)'
+              boxShadow: 'none'
             }}>
               <Database size={22} color="#ffffff" />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
-                  Tiger Data Real-Time Stream
+                  Microclimate Sensor Telemetry Stream
                 </h2>
                 <span style={{
                   fontSize: '0.72rem',
                   fontWeight: 600,
                   padding: '2px 8px',
                   borderRadius: '999px',
-                  backgroundColor: status?.connected ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                  color: status?.connected ? '#4ade80' : '#f87171',
-                  border: `1px solid ${status?.connected ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                  backgroundColor: status?.connected ? 'var(--semantic-green-bg)' : 'var(--semantic-red-bg)',
+                  color: status?.connected ? 'var(--semantic-green)' : 'var(--semantic-red)',
+                  border: `1px solid ${status?.connected ? 'rgba(78, 128, 100, 0.3)' : 'rgba(180, 71, 61, 0.3)'}`,
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px'
                 }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: status?.connected ? '#22c55e' : '#ef4444' }} />
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: status?.connected ? 'var(--semantic-green)' : 'var(--semantic-red)' }} />
                   {status?.connected ? 'Timescale Hypertable Live' : 'Connecting'}
                 </span>
               </div>
-              <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
-                Ingesting live NOAA &amp; Open-Meteo Raleigh observations directly into TimescaleDB / Tiger Data
+              <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                Ingesting live NOAA &amp; Open-Meteo Raleigh observations directly into TimescaleDB Sensor Mesh
               </p>
             </div>
           </div>
@@ -150,12 +149,12 @@ export default function TigerDataModal({ isOpen, onClose }) {
                 borderRadius: '8px',
                 fontSize: '0.82rem',
                 fontWeight: 600,
-                backgroundColor: '#f97316',
+                backgroundColor: 'var(--semantic-blue)',
                 color: '#ffffff',
                 border: 'none',
                 cursor: ingesting ? 'not-allowed' : 'pointer',
                 opacity: ingesting ? 0.7 : 1,
-                boxShadow: '0 2px 8px rgba(249, 115, 22, 0.35)',
+                boxShadow: 'none',
                 transition: 'all 0.15s ease'
               }}
             >
@@ -167,7 +166,7 @@ export default function TigerDataModal({ isOpen, onClose }) {
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#94a3b8',
+                color: 'var(--text-secondary)',
                 cursor: 'pointer',
                 padding: '6px',
                 borderRadius: '6px'
@@ -183,57 +182,57 @@ export default function TigerDataModal({ isOpen, onClose }) {
           
           {/* Diagnostic Metric Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-            <div style={{ backgroundColor: '#1e293b', padding: '14px', borderRadius: '10px', border: '1px solid #334155' }}>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Ingested Rows</div>
-              <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#f8fafc', marginTop: '4px' }}>
+            <div style={{ backgroundColor: 'var(--bg-elevated)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-default)' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Ingested Rows</div>
+              <div style={{ fontSize: '1.45rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '4px' }}>
                 {status?.totalRows?.toLocaleString() ?? '156'}
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#38bdf8', marginTop: '2px' }}>Hypertables Partitioned</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--semantic-blue)', marginTop: '2px' }}>Hypertables Partitioned</div>
             </div>
 
-            <div style={{ backgroundColor: '#1e293b', padding: '14px', borderRadius: '10px', border: '1px solid #334155' }}>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>SQL Query Latency</div>
-              <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#4ade80', marginTop: '4px' }}>
+            <div style={{ backgroundColor: 'var(--bg-elevated)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-default)' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>SQL Query Latency</div>
+              <div style={{ fontSize: '1.45rem', fontWeight: 600, color: 'var(--semantic-green)', marginTop: '4px' }}>
                 {telemetry?.latencyMs ? `${telemetry.latencyMs} ms` : '21 ms'}
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#4ade80', marginTop: '2px' }}>⚡ Ultra-Fast Continuous Rollup</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--semantic-green)', marginTop: '2px' }}>⚡ Ultra-Fast Continuous Rollup</div>
             </div>
 
-            <div style={{ backgroundColor: '#1e293b', padding: '14px', borderRadius: '10px', border: '1px solid #334155' }}>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Data Chunks</div>
-              <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#fb923c', marginTop: '4px' }}>
+            <div style={{ backgroundColor: 'var(--bg-elevated)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-default)' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Data Chunks</div>
+              <div style={{ fontSize: '1.45rem', fontWeight: 600, color: 'var(--semantic-amber)', marginTop: '4px' }}>
                 {status?.chunks || 1} Chunk
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#fb923c', marginTop: '2px' }}>Native Timescale Compression</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--semantic-amber)', marginTop: '2px' }}>Native Timescale Compression</div>
             </div>
 
-            <div style={{ backgroundColor: '#1e293b', padding: '14px', borderRadius: '10px', border: '1px solid #334155' }}>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Auto-Ingest Interval</div>
-              <div style={{ fontSize: '1.45rem', fontWeight: 700, color: '#a855f7', marginTop: '4px' }}>
+            <div style={{ backgroundColor: 'var(--bg-elevated)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-default)' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Auto-Ingest Interval</div>
+              <div style={{ fontSize: '1.45rem', fontWeight: 600, color: 'var(--semantic-blue)', marginTop: '4px' }}>
                 5 min
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#c084fc', marginTop: '2px' }}>NOAA / Open-Meteo Cron</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--semantic-blue)', marginTop: '2px' }}>NOAA / Open-Meteo Cron</div>
             </div>
           </div>
 
           {/* 24-Hour Continuous Aggregate Chart */}
-          <div style={{ backgroundColor: '#1e293b', borderRadius: '12px', padding: '16px 20px', border: '1px solid #334155' }}>
+          <div style={{ backgroundColor: 'var(--bg-elevated)', borderRadius: '8px', padding: '16px 20px', border: '1px solid var(--border-default)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f1f5f9' }}>
-                  📈 24-Hour Heat Wave Diurnal Curve (Tiger Data Continuous Aggregate)
+                <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  📈 24-Hour Heat Wave Diurnal Curve (Sensor Telemetry Continuous Aggregate)
                 </h3>
-                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>
-                  Aggregated via <code style={{ color: '#fb923c', background: 'rgba(251, 146, 60, 0.1)', padding: '2px 5px', borderRadius: '4px' }}>time_bucket('1 hour', recorded_at)</code>
+                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  Aggregated via <code style={{ color: 'var(--semantic-amber-lt)', background: 'var(--bg-card)', padding: '2px 5px', borderRadius: '4px' }}>time_bucket('1 hour', recorded_at)</code>
                 </p>
               </div>
               <button 
                 onClick={() => setShowSql(!showSql)}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid #475569',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-default)',
                   borderRadius: '6px',
-                  color: '#94a3b8',
+                  color: 'var(--text-secondary)',
                   fontSize: '0.75rem',
                   padding: '4px 10px',
                   cursor: 'pointer'
@@ -245,11 +244,11 @@ export default function TigerDataModal({ isOpen, onClose }) {
 
             {showSql && (
               <pre style={{
-                background: '#090d16',
+                background: 'var(--bg-card)',
                 padding: '10px 14px',
                 borderRadius: '8px',
-                border: '1px solid #334155',
-                color: '#38bdf8',
+                border: '1px solid var(--border-default)',
+                color: 'var(--semantic-blue)',
                 fontSize: '0.75rem',
                 overflowX: 'auto',
                 marginBottom: '12px'
@@ -268,7 +267,7 @@ ORDER BY bucket ASC;`}
             )}
 
             {/* Sparkline / Bar visualization of the 24 hourly buckets */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '110px', paddingTop: '10px', borderBottom: '1px solid #334155' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '110px', paddingTop: '10px', borderBottom: '1px solid var(--border-default)' }}>
               {buckets.map((b, idx) => {
                 const temp = parseFloat(b.avg_temp || 70);
                 const heightPct = Math.max(15, Math.min(100, ((temp - minTemp) / tempRange) * 85 + 15));
@@ -281,21 +280,21 @@ ORDER BY bucket ASC;`}
                     <div style={{
                       width: '100%',
                       height: `${heightPct}%`,
-                      backgroundColor: isPeak ? '#f97316' : '#38bdf8',
+                      backgroundColor: isPeak ? 'var(--semantic-orange)' : 'var(--semantic-blue)',
                       borderRadius: '3px 3px 0 0',
                       transition: 'height 0.3s ease',
                       opacity: 0.85
                     }} />
-                    <span style={{ fontSize: '0.62rem', color: '#64748b', marginTop: '4px' }}>
+                    <span style={{ fontSize: '0.62rem', color: 'var(--text-tertiary)', marginTop: '4px' }}>
                       {idx % 3 === 0 ? ampm : ''}
                     </span>
                   </div>
                 );
               })}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.72rem', color: '#94a3b8' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
               <span>Low: <strong>{minTemp}°F</strong></span>
-              <span style={{ color: '#f97316' }}>Peak Heat Index: <strong>{maxTemp}°F</strong></span>
+              <span style={{ color: 'var(--semantic-orange)' }}>Peak Heat Index: <strong>{maxTemp}°F</strong></span>
               <span>24 Hour Rollup Query: <strong>{trends?.latencyMs || 22}ms</strong></span>
             </div>
           </div>
@@ -303,10 +302,10 @@ ORDER BY bucket ASC;`}
           {/* Real-World Raleigh Microclimate Stations */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f1f5f9' }}>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                 🛰️ Live Ingested Microclimate Stations (Hypertable Rows)
               </h3>
-              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
                 Last Synced: {lastRefreshed || 'Just now'}
               </span>
             </div>
@@ -318,10 +317,10 @@ ORDER BY bucket ASC;`}
 
                 return (
                   <div key={i} style={{
-                    backgroundColor: '#1e293b',
-                    borderRadius: '10px',
+                    backgroundColor: 'var(--bg-elevated)',
+                    borderRadius: '8px',
                     padding: '14px',
-                    border: `1px solid ${isUhiHot ? 'rgba(239, 68, 68, 0.4)' : isCooler ? 'rgba(56, 189, 248, 0.4)' : '#334155'}`,
+                    border: `1px solid ${isUhiHot ? 'rgba(180, 71, 61, 0.35)' : isCooler ? 'rgba(49, 95, 125, 0.35)' : 'var(--border-default)'}`,
                     position: 'relative'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -330,38 +329,38 @@ ORDER BY bucket ASC;`}
                         fontWeight: 700,
                         padding: '1px 6px',
                         borderRadius: '4px',
-                        backgroundColor: isUhiHot ? 'rgba(239, 68, 68, 0.15)' : isCooler ? 'rgba(56, 189, 248, 0.15)' : 'rgba(148, 163, 184, 0.15)',
-                        color: isUhiHot ? '#ef4444' : isCooler ? '#38bdf8' : '#94a3b8'
+                        backgroundColor: isUhiHot ? 'var(--semantic-red-bg)' : isCooler ? 'var(--semantic-blue-bg)' : 'var(--bg-card)',
+                        color: isUhiHot ? 'var(--semantic-red)' : isCooler ? 'var(--semantic-blue)' : 'var(--text-secondary)'
                       }}>
                         {stn.uhi_offset_f > 0 ? `+${stn.uhi_offset_f}°F UHI` : `${stn.uhi_offset_f}°F Canopy`}
                       </span>
-                      <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)' }}>
                         Tract {stn.tract_geoid?.slice(-5)}
                       </span>
                     </div>
 
-                    <div style={{ marginTop: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ marginTop: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {stn.station_name}
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '6px' }}>
-                      <span style={{ fontSize: '1.4rem', fontWeight: 700, color: isUhiHot ? '#f87171' : '#f8fafc' }}>
+                      <span style={{ fontSize: '1.4rem', fontWeight: 600, color: isUhiHot ? 'var(--semantic-red)' : 'var(--text-primary)' }}>
                         {stn.temperature_f}°F
                       </span>
-                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                         Feels: {stn.feels_like_f}°F
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '8px', fontSize: '0.72rem', color: '#94a3b8', borderTop: '1px solid #334155', paddingTop: '8px' }}>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '8px', fontSize: '0.72rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-default)', paddingTop: '8px' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Droplets size={12} color="#38bdf8" /> {stn.humidity_pct}%
+                        <Droplets size={12} color="var(--semantic-blue)" /> {stn.humidity_pct}%
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Wind size={12} color="#a3e635" /> {stn.wind_speed_mph} mph
+                        <Wind size={12} color="var(--text-secondary)" /> {stn.wind_speed_mph} mph
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Flame size={12} color="#fb923c" /> HI: {stn.heat_index_f}°F
+                        <Flame size={12} color="var(--semantic-orange)" /> HI: {stn.heat_index_f}°F
                       </span>
                     </div>
                   </div>
@@ -375,23 +374,23 @@ ORDER BY bucket ASC;`}
         {/* Footer */}
         <div style={{
           padding: '12px 24px',
-          borderTop: '1px solid #1e293b',
-          backgroundColor: '#090d16',
+          borderTop: '1px solid var(--border-default)',
+          backgroundColor: 'var(--bg-elevated)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           fontSize: '0.78rem',
-          color: '#64748b'
+          color: 'var(--text-tertiary)'
         }}>
           <div>
-            Powered by <strong>Tiger Data / Timescale Cloud PostgreSQL</strong> · Free real-world NOAA &amp; Open-Meteo streams
+            Powered by <strong>Timescale Cloud Sensor Telemetry Mesh</strong> · Free real-world NOAA &amp; Open-Meteo streams
           </div>
           <button
             onClick={fetchData}
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#38bdf8',
+              color: 'var(--semantic-blue)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',

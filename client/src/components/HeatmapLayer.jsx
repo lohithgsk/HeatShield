@@ -46,12 +46,12 @@ export default function HeatmapLayer({ points, options }) {
           max: options?.max ?? 1.0,
           minOpacity: options?.minOpacity ?? 0.35,
           gradient: options?.gradient ?? {
-            0.15: '#3b82f6',
-            0.35: '#06b6d4',
-            0.55: '#10b981',
-            0.72: '#f59e0b',
-            0.88: '#f97316',
-            1.00: '#ef4444'
+            0.15: '#4E8064',
+            0.35: '#D1A33A',
+            0.55: '#D58A3C',
+            0.72: '#CC653E',
+            0.88: '#B4473D',
+            1.00: '#B4473D'
           }
         };
 

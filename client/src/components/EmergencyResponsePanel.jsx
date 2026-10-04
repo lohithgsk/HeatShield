@@ -86,7 +86,7 @@ export default function EmergencyResponsePanel({
             <Volume2 size={13} />
             Voice Broadcast
           </button>
-          <button className="btn btn-warning" onClick={onOpenTigerData} title="Tiger Data Sensors">
+          <button className="btn btn-warning" onClick={onOpenTigerData} title="Sensor Telemetry">
             <span style={{ fontSize: 13 }}>🐅</span>
             Sensors
           </button>

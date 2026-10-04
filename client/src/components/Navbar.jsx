@@ -1,23 +1,21 @@
-```jsx
-import React from 'react';
+import React, { useState } from 'react';
 import Logo from './Logo';
 
 import {
+  Database,
+  Megaphone,
   Building2,
   ShieldAlert,
   Compass,
   LogOut,
   Zap,
   Volume2,
-  AlertTriangle,
   Sparkles,
-  Radio,
   Crosshair,
   BarChart3,
   BrainCircuit,
-  Navigation,
-  Wifi,
-  WifiOff,
+  MoreHorizontal,
+  ChevronDown,
 } from 'lucide-react';
 
 export default function Navbar({
@@ -51,16 +49,20 @@ export default function Navbar({
   authSession = null,
 
   onReturnToLanding,
-  onOpenReportModal,
   onOpenWarRoom,
   isWarRoomActive,
 
   showHeatmap,
   setShowHeatmap,
+  onOpenSafety,
+  onOpenAnnouncements,
+  isSafetyOpen,
+  isAnnouncementsOpen,
 }) {
+  const [toolsOpen, setToolsOpen] = useState(false);
   const user = authSession?.user;
 
-  const tempF = liveWeather?.temp_f ?? 78.4;
+  const tempF = liveWeather?.temperature_f ?? liveWeather?.temp_f;
 
   /* ─────────────────────────────────────────────
      Navigation handlers
@@ -84,24 +86,6 @@ export default function Navbar({
     }
   };
 
-  const handleReportsClick = () => {
-    if (authRole === 'city_planner') {
-      if (setActiveDrawer) {
-        setActiveDrawer(
-          activeDrawer === 'analytics' ? null : 'analytics'
-        );
-      }
-    } else if (authRole === 'emergency_ems') {
-      if (onOpenTigerData) {
-        onOpenTigerData();
-      }
-    } else {
-      if (onOpenReportModal) {
-        onOpenReportModal();
-      }
-    }
-  };
-
   const handlePersonaChange = (e) => {
     if (setPersona) {
       setPersona(e.target.value);
@@ -116,19 +100,25 @@ export default function Navbar({
     }
   };
 
+  const closeToolsMenu = (event) => {
+    const menu = event.currentTarget.closest('details');
+    if (menu) menu.open = false;
+    setToolsOpen(false);
+  };
+
   /* ─────────────────────────────────────────────
      Role labels
   ───────────────────────────────────────────── */
 
   const roleLabel =
     authRole === 'city_planner'
-      ? 'Urban Planning Console'
+      ? 'City Planning'
       : authRole === 'emergency_ems'
-        ? 'EMS Operations Terminal'
+        ? 'EMS Response'
         : 'Resident Heat Safety';
 
   return (
-    <header className="top-navbar">
+    <header className={`top-navbar role-${authRole}`}>
 
       {/* ═══════════════════════════════════════════
           LEFT: BRAND + ROLE + PERSONA
@@ -173,7 +163,7 @@ export default function Navbar({
                 size={13}
                 className="text-blue"
               />
-              <span>{roleLabel}</span>
+              <span className="navbar-role-label">{roleLabel}</span>
 
               {user?.fullName && (
                 <span className="role-user-sub">
@@ -189,7 +179,7 @@ export default function Navbar({
                 size={13}
                 className="text-red"
               />
-              <span>{roleLabel}</span>
+              <span className="navbar-role-label">{roleLabel}</span>
 
               {user?.fullName && (
                 <span className="role-user-sub">
@@ -285,176 +275,17 @@ export default function Navbar({
           <span>Resources</span>
         </button>
 
+        {/* Safety & Precautions Mode */}
         <button
           type="button"
-          className={`nav-quiet-item ${
-            activeDrawer === 'analytics'
-              ? 'active'
-              : ''
-          }`}
-          onClick={handleReportsClick}
-          title={
-            authRole === 'city_planner'
-              ? 'Tract Equity Analytics and Reports'
-              : authRole === 'emergency_ems'
-                ? 'Time-Series Telemetry and Sensor Logs'
-                : 'Submit Heat Advisory Report'
-          }
+          className={`nav-quiet-item ${isSafetyOpen ? 'active' : ''}`}
+          onClick={onOpenSafety}
+          title="Heat Wave Health Guide, First-Aid Cooling, & Safety Precautions"
         >
-          <span>Reports</span>
+          <span>Safety</span>
         </button>
+
       </nav>
-
-
-      {/* ═══════════════════════════════════════════
-          KPI RIBBON
-          Preserved from original implementation
-      ═══════════════════════════════════════════ */}
-
-      <div className="hud-ribbon">
-
-        {/* Dead Zones */}
-        <div
-          className="hud-item"
-          title="High-heat tracts with no walking-distance cooling access"
-        >
-          <span
-            className="hud-item-icon"
-            style={{ color: '#ef4444' }}
-          >
-            🚨
-          </span>
-
-          <div className="hud-item-content">
-            <span className="hud-item-label">
-              Dead Zones
-            </span>
-
-            <span
-              className="hud-item-value"
-              style={{ color: '#ef4444' }}
-            >
-              {kpis?.dead_zones_count ?? 22}
-            </span>
-          </div>
-        </div>
-
-
-        {/* Peak Surface Temperature */}
-        <div
-          className="hud-item"
-          title="Peak satellite surface temperature in Raleigh"
-        >
-          <span
-            className="hud-item-icon"
-            style={{ color: '#eab308' }}
-          >
-            🌡️
-          </span>
-
-          <div className="hud-item-content">
-            <span className="hud-item-label">
-              Peak Surface
-            </span>
-
-            <span
-              className="hud-item-value"
-              style={{ color: '#eab308' }}
-            >
-              {kpis?.max_surface_temp ?? 102.4}°F
-            </span>
-          </div>
-        </div>
-
-
-        {/* Tree Canopy */}
-        <div
-          className="hud-item"
-          title="Citywide average urban tree canopy cover"
-        >
-          <span
-            className="hud-item-icon"
-            style={{ color: '#22c55e' }}
-          >
-            🌳
-          </span>
-
-          <div className="hud-item-content">
-            <span className="hud-item-label">
-              Tree Canopy
-            </span>
-
-            <span
-              className="hud-item-value"
-              style={{ color: '#22c55e' }}
-            >
-              {kpis?.avg_canopy_pct ?? 31.8}%
-            </span>
-          </div>
-        </div>
-
-
-        {/* Vulnerable Population */}
-        <div
-          className="hud-item"
-          title="Vulnerable residents with no cooling refuge within a 15-minute walk"
-        >
-          <span
-            className="hud-item-icon"
-            style={{ color: '#a855f7' }}
-          >
-            👥
-          </span>
-
-          <div className="hud-item-content">
-            <span className="hud-item-label">
-              Unserved Vuln
-            </span>
-
-            <span
-              className="hud-item-value"
-              style={{ color: '#a855f7' }}
-            >
-              {(
-                kpis?.unserved_vulnerable_pop ??
-                18450
-              ).toLocaleString()}
-            </span>
-          </div>
-        </div>
-
-
-        {/* Live Weather */}
-        {isRealtime && liveWeather && (
-          <div
-            className="hud-item live-weather-pill"
-            title="Live meteorological reading from Open-Meteo"
-          >
-            <span className="hud-item-icon">
-              🌤️
-            </span>
-
-            <div className="hud-item-content">
-              <span className="hud-item-label">
-                Live Raleigh
-              </span>
-
-              <span
-                className="hud-item-value"
-                style={{ color: '#38bdf8' }}
-              >
-                {liveWeather.temp_f}°F ·{' '}
-                {liveWeather.humidity_pct}% RH
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-
-
-      {/* ═══════════════════════════════════════════
-          RIGHT: TELEMETRY + ROLE ACTIONS
-      ═══════════════════════════════════════════ */}
 
       <div className="navbar-right-group">
 
@@ -463,7 +294,7 @@ export default function Navbar({
           <span className="live-dot" />
 
           <span className="telemetry-temp">
-            {tempF.toFixed(1)}°F
+            {tempF != null ? `${Number(tempF).toFixed(1)}°F` : 'Temp unavailable'}
           </span>
 
           <span className="telemetry-status">
@@ -472,245 +303,117 @@ export default function Navbar({
         </div>
 
 
-        {/* Tiger Data */}
-        {onOpenTigerData && (
-          <button
-            id="btn-tiger-data"
-            className="btn-nav-action"
-            onClick={onOpenTigerData}
-            title="Open Tiger Data / Timescale Real-Time Telemetry & Continuous Aggregates"
-            style={{
-              borderColor:
-                'rgba(249, 115, 22, 0.55)',
-              background:
-                'linear-gradient(135deg, rgba(234, 88, 12, 0.22) 0%, rgba(15, 23, 42, 0.7) 100%)',
-            }}
+        {(authRole === 'city_planner' || authRole === 'emergency_ems') && (
+          <details
+            className="navbar-tools-menu"
+            open={toolsOpen}
+            onToggle={(event) => setToolsOpen(event.currentTarget.open)}
           >
-            <span style={{ fontSize: '13px' }}>
-              🐅
-            </span>
-
-            <span
-              style={{
-                color: '#fb923c',
-                fontWeight: 600,
-              }}
-            >
-              Tiger Data
-            </span>
-
-            <span
-              className="live-dot"
-              style={{
-                backgroundColor: '#f97316',
-              }}
-            />
-          </button>
+            <summary className="navbar-tools-trigger" aria-label="Open operational tools">
+              <MoreHorizontal size={15} />
+              <span>Tools</span>
+              <ChevronDown size={12} />
+            </summary>
+            <div className="navbar-tools-popover">
+              {authRole === 'city_planner' && (
+                <>
+                  {setIsPlacingIntervention && (
+                    <button
+                      id="btn-place-intervention"
+                      className={`navbar-tool-item${isPlacingIntervention ? ' active' : ''}`}
+                      onClick={(event) => {
+                        setIsPlacingIntervention(!isPlacingIntervention);
+                        closeToolsMenu(event);
+                      }}
+                      title="Drop a hypothetical cooling facility on the map"
+                    >
+                      <Crosshair size={14} />
+                      <span>{isPlacingIntervention ? 'Cancel map placement' : 'Drop asset on map'}</span>
+                    </button>
+                  )}
+                  <button
+                    id="btn-scenario-drawer"
+                    className={`navbar-tool-item${activeDrawer === 'scenario' ? ' active' : ''}`}
+                    onClick={(event) => {
+                      toggleDrawer('scenario');
+                      closeToolsMenu(event);
+                    }}
+                    title="Scenario Intervention Planner"
+                  >
+                    <Building2 size={14} />
+                    <span>Intervention scenarios</span>
+                  </button>
+                  <button
+                    id="btn-copilot-drawer"
+                    className={`navbar-tool-item${activeDrawer === 'copilot' ? ' active' : ''}`}
+                    onClick={(event) => {
+                      toggleDrawer('copilot');
+                      closeToolsMenu(event);
+                    }}
+                    title="Climate Copilot"
+                  >
+                    <Sparkles size={14} />
+                    <span>Climate Copilot</span>
+                  </button>
+                  <button
+                    id="btn-analytics-drawer"
+                    className={`navbar-tool-item${activeDrawer === 'analytics' ? ' active' : ''}`}
+                    onClick={(event) => {
+                      toggleDrawer('analytics');
+                      closeToolsMenu(event);
+                    }}
+                    title="Tract Equity Analytics"
+                  >
+                    <BarChart3 size={14} />
+                    <span>Equity analytics</span>
+                  </button>
+                  {onOpenForecast && (
+                    <button
+                      id="btn-forecast-drawer"
+                      className={`navbar-tool-item${activeDrawer === 'forecast' ? ' active' : ''}`}
+                      onClick={(event) => {
+                        onOpenForecast();
+                        closeToolsMenu(event);
+                      }}
+                      title="Open heat index forecasts"
+                    >
+                      <BrainCircuit size={14} />
+                      <span>Heat forecast</span>
+                    </button>
+                  )}
+                </>
+              )}
+              {onOpenTigerData && (
+                <button
+                  id="btn-tiger-data"
+                  className="navbar-tool-item"
+                  onClick={(event) => {
+                    onOpenTigerData();
+                    closeToolsMenu(event);
+                  }}
+                  title="Open sensor telemetry"
+                >
+                  <Database size={14} />
+                  <span>Sensor telemetry</span>
+                  <span className="live-dot" />
+                </button>
+              )}
+              {authRole === 'emergency_ems' && (
+                <button
+                  className={`navbar-tool-item${activeDrawer === 'audio' ? ' active' : ''}`}
+                  onClick={(event) => {
+                    setActiveDrawer('audio');
+                    closeToolsMenu(event);
+                  }}
+                  title="Open radio advisory"
+                >
+                  <Volume2 size={14} />
+                  <span>Radio advisory</span>
+                </button>
+              )}
+            </div>
+          </details>
         )}
-
-
-        {/* Real-Time Toggle */}
-        {setIsRealtime && (
-          <button
-            id="btn-realtime-toggle"
-            className={`btn-nav-action${
-              isRealtime ? ' active' : ''
-            }`}
-            onClick={() => setIsRealtime(!isRealtime)}
-            title={
-              isRealtime
-                ? 'Real-Time ON — live GPS & weather'
-                : 'Enable Real-Time Mode'
-            }
-            style={
-              isRealtime
-                ? {
-                    borderColor:
-                      'rgba(52,211,153,0.5)',
-                    color: '#34d399',
-                  }
-                : {}
-            }
-          >
-            {isRealtime ? (
-              <Wifi
-                size={14}
-                style={{ color: '#34d399' }}
-              />
-            ) : (
-              <WifiOff size={14} />
-            )}
-
-            <span>
-              {isRealtime
-                ? 'Live'
-                : 'Live Mode'}
-            </span>
-
-            {isRealtime && (
-              <span className="live-dot" />
-            )}
-          </button>
-        )}
-
-
-        {/* Find Nearest */}
-        {isRealtime && onFindNearest && (
-          <button
-            id="btn-find-nearest"
-            className="btn-nav-action"
-            onClick={onFindNearest}
-            disabled={!userLocation}
-            style={{
-              opacity: userLocation ? 1 : 0.55,
-            }}
-            title={
-              userLocation
-                ? 'Find nearest cooling center'
-                : 'Waiting for GPS…'
-            }
-          >
-            <Navigation
-              size={14}
-              style={{ color: '#38bdf8' }}
-            />
-
-            <span>
-              Find Nearest
-            </span>
-          </button>
-        )}
-
-
-        {/* Drop Asset */}
-        {setIsPlacingIntervention && (
-          <button
-            id="btn-place-intervention"
-            className={`btn-nav-action${
-              isPlacingIntervention
-                ? ' active'
-                : ''
-            }`}
-            onClick={() =>
-              setIsPlacingIntervention(
-                !isPlacingIntervention
-              )
-            }
-            title="Drop a hypothetical cooling facility on the map"
-          >
-            <Crosshair size={14} />
-
-            <span>
-              {isPlacingIntervention
-                ? 'Click Map…'
-                : 'Drop Asset'}
-            </span>
-          </button>
-        )}
-
-
-        {/* Scenarios */}
-        <button
-          id="btn-scenario-drawer"
-          className={`btn-nav-action${
-            activeDrawer === 'scenario'
-              ? ' active'
-              : ''
-          }`}
-          onClick={() =>
-            toggleDrawer('scenario')
-          }
-        >
-          <Building2 size={14} />
-          <span>Scenarios</span>
-        </button>
-
-
-        {/* AI Copilot */}
-        <button
-          id="btn-copilot-drawer"
-          className={`btn-nav-action${
-            activeDrawer === 'copilot'
-              ? ' active'
-              : ''
-          }`}
-          onClick={() =>
-            toggleDrawer('copilot')
-          }
-        >
-          <Sparkles
-            size={14}
-            style={{ color: '#60a5fa' }}
-          />
-
-          <span>AI Copilot</span>
-        </button>
-
-
-        {/* Voice */}
-        <button
-          id="btn-audio-drawer"
-          className={`btn-nav-action${
-            activeDrawer === 'audio'
-              ? ' active'
-              : ''
-          }`}
-          onClick={() =>
-            toggleDrawer('audio')
-          }
-        >
-          <Radio
-            size={14}
-            style={{ color: '#c084fc' }}
-          />
-
-          <span>Voice</span>
-        </button>
-
-
-        {/* Analytics */}
-        <button
-          id="btn-analytics-drawer"
-          className={`btn-nav-action${
-            activeDrawer === 'analytics'
-              ? ' active'
-              : ''
-          }`}
-          onClick={() =>
-            toggleDrawer('analytics')
-          }
-        >
-          <BarChart3 size={14} />
-
-          <span>Analytics</span>
-        </button>
-
-
-        {/* Forecast */}
-        {onOpenForecast && (
-          <button
-            id="btn-forecast-drawer"
-            className={`btn-nav-action${
-              activeDrawer === 'forecast'
-                ? ' active'
-                : ''
-            }`}
-            onClick={onOpenForecast}
-            title="Open machine-learning heat index forecasts"
-          >
-            <BrainCircuit
-              size={14}
-              style={{ color: '#a78bfa' }}
-            />
-
-            <span>Forecast</span>
-          </button>
-        )}
-
-
-        {/* ═══════════════════════════════════════
-            ROLE-SPECIFIC PRIMARY ACTIONS
-        ═══════════════════════════════════════ */}
 
         {/* City Planner: War Room */}
         {authRole === 'city_planner' && (
@@ -734,41 +437,28 @@ export default function Navbar({
         )}
 
 
-        {/* EMS: Radio Advisory */}
-        {authRole === 'emergency_ems' && (
-          <button
-            className="btn btn-secondary"
-            style={{
-              fontSize: 11,
-              padding: '4px 10px',
-            }}
-            onClick={() =>
-              setActiveDrawer('audio')
-            }
-          >
-            <Volume2 size={12} />
-
-            <span>Radio Advisory</span>
-          </button>
-        )}
-
-
-        {/* Community: Report Hazard */}
-        {authRole === 'community' && (
-          <button
-            className="btn btn-danger"
-            style={{
-              fontSize: 11,
-              padding: '4px 10px',
-            }}
-            onClick={onOpenReportModal}
-          >
-            <AlertTriangle size={12} />
-
-            <span>Report Hazard</span>
-          </button>
-        )}
-
+        {/* Official City Announcements & Directives */}
+        <button
+          type="button"
+          className={`btn btn-secondary ${isAnnouncementsOpen ? 'active' : ''}`}
+          style={{ fontSize: 11, padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 5 }}
+          onClick={onOpenAnnouncements}
+          title="Official City Advisories & Emergency Directives"
+        >
+          <Megaphone size={12} style={{ color: '#fb923c' }} />
+          <span>Announcements</span>
+          <span style={{
+            background: 'var(--semantic-red)',
+            color: '#fff',
+            fontSize: '9.5px',
+            fontWeight: 700,
+            padding: '1px 5px',
+            borderRadius: '8px',
+            lineHeight: 1.2
+          }}>
+            4
+          </span>
+        </button>
 
         {/* Exit */}
         {onReturnToLanding && (
@@ -792,4 +482,3 @@ export default function Navbar({
     </header>
   );
 }
-```

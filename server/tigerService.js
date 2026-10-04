@@ -500,7 +500,7 @@ async function saveCommunitySubscription(email, addresses) {
       return {
         success: true,
         subscription: res.rows[0],
-        message: `Registered ${addresses.length} monitored location(s) for ${cleanEmail}. Severe heat advisory dispatched.`
+        message: `Registered ${addresses.length} monitored location(s) for ${cleanEmail}.`
       };
     } finally {
       client.release();

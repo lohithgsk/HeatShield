@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Radio, Volume2, Play, Pause, Download, Sparkles, RefreshCw } from 'lucide-react';
+import { X, Radio, Volume2, Download, RefreshCw } from 'lucide-react';
 
 const PRESET_SCRIPTS = {
   emergency: `Emergency Extreme Heat Advisory for the City of Raleigh. Municipal microclimate monitoring stations record peak surface temperatures exceeding 104 degrees Fahrenheit, particularly in Southeast Raleigh and East Raleigh corridors. Our spatial decision support system has identified 22 critical heat dead zones across the city, leaving over 32,000 vulnerable residents outside safe walking distance to cooling infrastructure. Emergency cooling shelters and transit misting pavilions are now active. Please check on elderly neighbors and stay hydrated.`,
@@ -19,6 +19,7 @@ export default function AudioDrawer({
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [synthesisError, setSynthesisError] = useState('');
 
   const audioRef = useRef(null);
 
@@ -46,6 +47,7 @@ export default function AudioDrawer({
     if (!scriptText.trim()) return;
     setIsSynthesizing(true);
     setAudioUrl(null);
+    setSynthesisError('');
 
     try {
       const response = await fetch('/api/tts', {
@@ -63,7 +65,7 @@ export default function AudioDrawer({
       setAudioUrl(url);
     } catch (e) {
       console.error(e);
-      alert('Failed to synthesize audio with ElevenLabs. Please check API key in .env.');
+      setSynthesisError('Audio synthesis failed. Check the voice service configuration and try again.');
     } finally {
       setIsSynthesizing(false);
     }
@@ -81,7 +83,7 @@ export default function AudioDrawer({
   };
 
   return (
-    <div className={`action-drawer ${isOpen ? 'open' : ''}`}>
+    <div className={`action-drawer audio-drawer ${isOpen ? 'open' : ''}`} aria-label="Voice broadcast">
       <div className="drawer-header">
         <div className="drawer-title-group">
           <Radio size={20} style={{ color: 'var(--semantic-blue)' }} />
@@ -90,19 +92,20 @@ export default function AudioDrawer({
             <span className="drawer-subtitle">Studio-Quality AI Speech Synthesis</span>
           </div>
         </div>
-        <button className="btn-close-drawer" onClick={onClose}>
+        <button className="btn-close-drawer" onClick={onClose} aria-label="Close voice broadcast">
           <X size={18} />
         </button>
       </div>
 
-      <div className="drawer-body">
+      <div className="drawer-body audio-drawer-body">
         {/* Voice Profile Selector */}
-        <div>
-          <label className="control-label" style={{ marginBottom: '6px', display: 'block' }}>
+        <div className="audio-field">
+          <label className="control-label" htmlFor="broadcast-voice">
             Select ElevenLabs AI Voice
           </label>
           <select 
-            className="control-select"
+            className="audio-select"
+            id="broadcast-voice"
             value={selectedVoice}
             onChange={(e) => setSelectedVoice(e.target.value)}
           >
@@ -124,28 +127,28 @@ export default function AudioDrawer({
         </div>
 
         {/* Quick Preset Buttons */}
-        <div>
-          <label className="control-label" style={{ marginBottom: '6px', display: 'block' }}>
+        <div className="audio-field">
+          <span className="control-label">
             Quick Template
-          </label>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          </span>
+          <div className="audio-template-list">
             <button 
               className="btn-secondary-action" 
-              style={{ fontSize: '0.72rem', padding: '6px 10px' }}
+              type="button"
               onClick={() => setScriptText(PRESET_SCRIPTS.emergency)}
             >
               🚨 Heat Emergency Alert
             </button>
             <button 
               className="btn-secondary-action" 
-              style={{ fontSize: '0.72rem', padding: '6px 10px' }}
+              type="button"
               onClick={() => setScriptText(PRESET_SCRIPTS.council)}
             >
               🏛️ Council Resolution
             </button>
             <button 
               className="btn-secondary-action" 
-              style={{ fontSize: '0.72rem', padding: '6px 10px' }}
+              type="button"
               onClick={() => setScriptText(PRESET_SCRIPTS.equity)}
             >
               🌳 Tree Equity Spotlight
@@ -154,27 +157,30 @@ export default function AudioDrawer({
         </div>
 
         {/* Script Text Area */}
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <label className="control-label">Spoken Broadcast Script</label>
-            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{scriptText.length} characters</span>
+        <div className="audio-field">
+          <div className="audio-script-heading">
+            <label className="control-label" htmlFor="broadcast-script">Spoken Broadcast Script</label>
+            <span className="audio-character-count">{scriptText.length} characters</span>
           </div>
           <textarea 
-            className="control-select"
+            id="broadcast-script"
+            className="audio-script-input"
             rows={7}
             value={scriptText}
             onChange={(e) => setScriptText(e.target.value)}
             placeholder="Type or paste briefing script to synthesize..."
-            style={{ resize: 'vertical' }}
           />
         </div>
+
+        {synthesisError && <div className="audio-error" role="alert">{synthesisError}</div>}
 
         {/* Generate Button */}
         <button 
           className="btn-primary-action"
-          style={{ width: '100%', padding: '12px', background: 'linear-gradient(135deg, var(--semantic-blue) 0%, #7e22ce 100%)' }}
+          type="button"
+          style={{ width: '100%', padding: '12px' }}
           onClick={handleSynthesize}
-          disabled={isSynthesizing}
+          disabled={isSynthesizing || !scriptText.trim()}
         >
           {isSynthesizing ? <RefreshCw className="animate-spin" size={16} /> : <Volume2 size={16} />}
           <span>{isSynthesizing ? 'Synthesizing with ElevenLabs...' : 'Synthesize Audio Broadcast'}</span>

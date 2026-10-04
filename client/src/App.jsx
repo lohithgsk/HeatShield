@@ -11,6 +11,8 @@ import ForecastDrawer from './components/ForecastDrawer';
 import NearestCoolingModal from './components/NearestCoolingModal';
 import TigerDataModal from './components/TigerDataModal';
 import ReportHeatAlertModal from './components/ReportHeatAlertModal';
+import SafetyPrecautionModal from './components/SafetyPrecautionModal';
+import CityAnnouncementsModal from './components/CityAnnouncementsModal';
 import HistoricalReplayBar from './components/HistoricalReplayBar';
 import HeatwaveWarRoomModal from './components/HeatwaveWarRoomModal';
 import { HISTORICAL_HEATWAVES } from './data/historicalHeatwaves';
@@ -81,10 +83,12 @@ export default function App() {
   const [userLocation, setUserLocation]     = useState({ lat: 35.7712, lon: -78.6271 }); // Chavis Park default
   const [userAddress, setUserAddress]       = useState('505 Martin Luther King Jr Blvd (SE Raleigh)');
   const [flyToCoords, setFlyToCoords]       = useState(null);
-  const [liveWeather, setLiveWeather]       = useState({ temp_f: 78.4, feels_like_f: 81.2, humidity_pct: 65 });
+  const [liveWeather, setLiveWeather]       = useState(null);
   const [nearestData, setNearestData]       = useState(null);
   const [showNearestModal, setShowNearestModal] = useState(false);
   const [showTigerModal, setShowTigerModal] = useState(false);
+  const [showSafetyModal, setShowSafetyModal] = useState(false);
+  const [showAnnouncementsModal, setShowAnnouncementsModal] = useState(false);
 
   const watchIdRef         = useRef(null);
   const weatherIntervalRef = useRef(null);
@@ -138,45 +142,42 @@ export default function App() {
 
   // ── Real-time geolocation + weather ──
   useEffect(() => {
-    if (isRealtime) {
-      if (navigator.geolocation) {
-        watchIdRef.current = navigator.geolocation.watchPosition(
-          (pos) => {
-            const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-            setUserLocation(loc);
-            setUserAddress(`GPS Location (${loc.lat.toFixed(4)}, ${loc.lon.toFixed(4)})`);
-            userLocRef.current = loc;
-          },
-          (err) => {
-            console.warn('Geolocation denied/unavailable, defaulting to Downtown Raleigh:', err.message);
-            const defaultLoc = { lat: 35.7796, lon: -78.6382 };
-            setUserLocation(defaultLoc);
-            userLocRef.current = defaultLoc;
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
-        );
-      }
+    const defaultLoc = { lat: 35.7796, lon: -78.6382 };
 
-      const fetchLiveWeather = () => {
-        const loc = userLocRef.current || { lat: 35.7796, lon: -78.6382 };
-        fetch(`/api/weather/live?lat=${loc.lat}&lon=${loc.lon}`)
-          .then(r => r.json())
-          .then(setLiveWeather)
-          .catch(console.error);
-      };
-
-      fetchLiveWeather();
-      weatherIntervalRef.current = setInterval(fetchLiveWeather, 60000);
-    } else {
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-        watchIdRef.current = null;
-      }
-      if (weatherIntervalRef.current !== null) {
-        clearInterval(weatherIntervalRef.current);
-        weatherIntervalRef.current = null;
-      }
+    if (isRealtime && navigator.geolocation) {
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+          setUserLocation(loc);
+          setUserAddress(`GPS Location (${loc.lat.toFixed(4)}, ${loc.lon.toFixed(4)})`);
+          userLocRef.current = loc;
+        },
+        (err) => {
+          console.warn('Geolocation denied/unavailable, defaulting to Downtown Raleigh:', err.message);
+          setUserLocation(defaultLoc);
+          userLocRef.current = defaultLoc;
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+      );
     }
+
+    const fetchLiveWeather = () => {
+      const loc = isRealtime ? (userLocRef.current || defaultLoc) : defaultLoc;
+      fetch(`/api/weather/live?lat=${loc.lat}&lon=${loc.lon}`)
+        .then((response) => {
+          if (!response.ok) throw new Error(`Weather request failed (${response.status})`);
+          return response.json();
+        })
+        .then((weather) => setLiveWeather({
+          ...weather,
+          temp_f: weather.temperature_f,
+          feels_like_f: weather.apparent_temperature_f
+        }))
+        .catch((error) => console.error('Failed to fetch live weather:', error));
+    };
+
+    fetchLiveWeather();
+    weatherIntervalRef.current = setInterval(fetchLiveWeather, 60000);
 
     return () => {
       if (watchIdRef.current !== null) {
@@ -309,19 +310,31 @@ export default function App() {
 
   // ── Interventions ──
   const handleInterventionPlaced = (coords) => {
-    setActiveIntervention(coords);
+    const normCoords = {
+      lat: coords.lat,
+      lon: coords.lon ?? coords.lng,
+      lng: coords.lng ?? coords.lon,
+      isMapPlaced: true
+    };
+    setActiveIntervention(normCoords);
     setIsPlacingIntervention(false);
     setActiveDrawer('scenario');
   };
 
   const handleRunSimulation = async (simData) => {
     try {
+      const payload = {
+        ...simData,
+        lon: simData.lon ?? simData.lng
+      };
       const res = await fetch('/api/simulation/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(simData)
+        body: JSON.stringify(payload)
       });
-      return await res.json();
+      const data = await res.json();
+      setActiveIntervention(data);
+      return data;
     } catch (err) {
       console.error('Simulation error:', err);
     }
@@ -371,6 +384,10 @@ export default function App() {
         // War Room props
         onOpenWarRoom={() => setShowWarRoomModal(true)}
         isWarRoomActive={isWarRoomActive}
+        onOpenSafety={() => setShowSafetyModal(true)}
+        isSafetyOpen={showSafetyModal}
+        onOpenAnnouncements={() => setShowAnnouncementsModal(true)}
+        isAnnouncementsOpen={showAnnouncementsModal}
       />
 
       <div className="workspace-container main-viewport">
@@ -564,6 +581,16 @@ export default function App() {
           userLocation={userLocation}
           userAddress={userAddress}
           onAlertSubmitted={fetchAlerts}
+        />
+
+        <SafetyPrecautionModal
+          isOpen={showSafetyModal}
+          onClose={() => setShowSafetyModal(false)}
+        />
+
+        <CityAnnouncementsModal
+          isOpen={showAnnouncementsModal}
+          onClose={() => setShowAnnouncementsModal(false)}
         />
       </div>
 

@@ -17,27 +17,27 @@ import { computeModeledTractTemperature, computeModeledTractHvi } from '../data/
 
 // Color interpolators
 function getHviColor(val) {
-  if (val >= 75) return '#ef4444'; // Extreme
-  if (val >= 55) return '#f97316'; // High
-  if (val >= 35) return '#eab308'; // Moderate
-  return '#10b981'; // Low
+  if (val >= 75) return '#B4473D'; // Extreme
+  if (val >= 55) return '#CC653E'; // High
+  if (val >= 35) return '#D1A33A'; // Moderate
+  return '#4E8064'; // Low
 }
 
 function getTempColor(val) {
-  if (val >= 106) return '#7f1d1d'; // Maximum Catastrophe
-  if (val >= 102) return '#dc2626'; // Extreme Danger
-  if (val >= 98)  return '#f97316'; // High Warning
-  if (val >= 94)  return '#eab308'; // Moderate
-  if (val >= 90)  return '#10b981'; // Normal
-  return '#3b82f6';
+  if (val >= 106) return '#B4473D'; // Extreme
+  if (val >= 102) return '#B4473D'; // Extreme
+  if (val >= 98)  return '#CC653E'; // High
+  if (val >= 94)  return '#D1A33A'; // Moderate
+  if (val >= 90)  return '#4E8064'; // Low
+  return '#4E8064';
 }
 
 function getCanopyColor(val) {
-  if (val >= 48) return '#047857';
-  if (val >= 35) return '#10b981';
-  if (val >= 25) return '#84cc16';
-  if (val >= 18) return '#f59e0b';
-  return '#ef4444';
+  if (val >= 48) return '#4E8064';
+  if (val >= 35) return '#D1A33A';
+  if (val >= 25) return '#D58A3C';
+  if (val >= 18) return '#CC653E';
+  return '#B4473D';
 }
 
 function getMetricColor(metric, p) {
@@ -47,11 +47,11 @@ function getMetricColor(metric, p) {
     case 'Tree Canopy Cover (%)':
       return getCanopyColor(Number(p.canopy_cover_pct) || 30);
     case 'Impervious Surface (%)':
-      return Number(p.impervious_pct) >= 65 ? '#ef4444' : (Number(p.impervious_pct) >= 45 ? '#f59e0b' : '#10b981');
+      return Number(p.impervious_pct) >= 65 ? '#B4473D' : (Number(p.impervious_pct) >= 45 ? '#D58A3C' : '#4E8064');
     case 'Poverty Rate (%)':
-      return Number(p.poverty_rate) >= 25 ? '#b91c1c' : (Number(p.poverty_rate) >= 15 ? '#f97316' : '#10b981');
+      return Number(p.poverty_rate) >= 25 ? '#B4473D' : (Number(p.poverty_rate) >= 15 ? '#D58A3C' : '#4E8064');
     case 'Senior Population 65+ (%)':
-      return Number(p.pct_elderly) >= 20 ? '#e11d48' : (Number(p.pct_elderly) >= 14 ? '#8b5cf6' : '#38bdf8');
+      return Number(p.pct_elderly) >= 20 ? '#B4473D' : (Number(p.pct_elderly) >= 14 ? '#D1A33A' : '#4E8064');
     case 'Heat Vulnerability Index (HVI)':
     default:
       return getHviColor(Number(p.heat_vulnerability_index) || 50);
@@ -109,7 +109,7 @@ function MapClickHandler({ isPlacing, onMapClick }) {
   useMapEvents({
     click(e) {
       if (onMapClick) {
-        onMapClick(e.latlng);
+        onMapClick({ lat: e.latlng.lat, lon: e.latlng.lng, lng: e.latlng.lng });
       }
     }
   });
@@ -164,9 +164,9 @@ export default function MapView({
   };
 
   const assetColors = {
-    'Public Library': '#38bdf8',
-    'Community Center': '#3b82f6',
-    'Public Pool / Aquatic': '#06b6d4',
+    'Public Library': '#315F7D',
+    'Community Center': '#315F7D',
+    'Public Pool / Aquatic': '#315F7D',
     'Park / Tree Shade': '#10b981'
   };
 
@@ -283,7 +283,14 @@ export default function MapView({
 
   const onEachTract = (feature, layer) => {
     layer.on({
-      click: () => {
+      click: (e) => {
+        if (isPlacingIntervention && onInterventionPlaced) {
+          const latlng = e.latlng || (e.target && e.target.getLatLng ? e.target.getLatLng() : null);
+          if (latlng) {
+            onInterventionPlaced({ lat: latlng.lat, lon: latlng.lng, lng: latlng.lng });
+            return;
+          }
+        }
         if (!isPlacingIntervention && onSelectTract) {
           const tractData = { ...feature.properties };
           if (isWarRoomActive && warRoomScenario) {
@@ -380,7 +387,16 @@ export default function MapView({
   }, [coolingResources, selectedResourceTypes]);
 
   return (
-    <div className="map-viewport map-view-wrapper" style={{ flex: 1, height: '100%', width: '100%', position: 'relative' }}>
+    <div 
+      className="map-viewport map-view-wrapper" 
+      style={{ 
+        flex: 1, 
+        height: '100%', 
+        width: '100%', 
+        position: 'relative',
+        cursor: isPlacingIntervention ? 'crosshair' : 'default'
+      }}
+    >
       
       {/* Floating War Room Active Banner */}
       {isWarRoomActive && (
@@ -474,9 +490,9 @@ export default function MapView({
                   center={[m.lat, m.lon]}
                   radius={450}
                   pathOptions={{
-                    color: '#06b6d4',
+                    color: '#315F7D',
                     weight: 2,
-                    fillColor: '#06b6d4',
+                    fillColor: '#315F7D',
                     fillOpacity: 0.16,
                     dashArray: '3, 5'
                   }}
@@ -546,9 +562,9 @@ export default function MapView({
               center={[lat, lon]}
               radius={800}
               pathOptions={{
-                color: assetColors[res.properties.type] || '#38bdf8',
+                color: assetColors[res.properties.type] || '#315F7D',
                 weight: 1,
-                fillColor: assetColors[res.properties.type] || '#38bdf8',
+                fillColor: assetColors[res.properties.type] || '#315F7D',
                 fillOpacity: 0.08,
                 dashArray: '3, 6'
               }}
@@ -561,7 +577,7 @@ export default function MapView({
           const lat = res.properties.latitude;
           const lon = res.properties.longitude;
           const type = res.properties.type;
-          const color = assetColors[type] || '#3b82f6';
+          const color = assetColors[type] || '#315F7D';
           if (!lat || !lon) return null;
 
           return (
@@ -595,30 +611,43 @@ export default function MapView({
               center={[userLocation.lat, userLocation.lon]}
               radius={800}
               pathOptions={{
-                color: '#38bdf8',
+                color: '#168BFF',
                 weight: 2,
-                fillColor: '#38bdf8',
-                fillOpacity: 0.12,
+                fillColor: '#168BFF',
+                fillOpacity: 0.08,
                 dashArray: '4, 4'
               }}
             />
             <CircleMarker
               center={[userLocation.lat, userLocation.lon]}
+              radius={17}
+              pathOptions={{
+                className: 'user-location-halo',
+                color: '#168BFF',
+                weight: 2,
+                fillColor: '#168BFF',
+                fillOpacity: 0.12
+              }}
+              interactive={false}
+            />
+            <CircleMarker
+              center={[userLocation.lat, userLocation.lon]}
               radius={8}
               pathOptions={{
-                color: '#ffffff',
-                weight: 3,
-                fillColor: '#0284c7',
+                className: 'user-location-core',
+                color: '#FFFFFF',
+                weight: 2.5,
+                fillColor: '#168BFF',
                 fillOpacity: 1
               }}
             >
               <Popup>
                 <div style={{ fontFamily: 'sans-serif', fontSize: '12px' }}>
-                  <b style={{ color: '#0369a1', fontSize: '13px' }}>📍 Your Location / Address</b>
+                  <b style={{ color: '#0873D1', fontSize: '13px' }}>Your Location / Address</b>
                   <p style={{ margin: '3px 0 0', color: '#475569' }}>
                     {userAddress || `${userLocation.lat.toFixed(4)}, ${userLocation.lon.toFixed(4)}`}
                   </p>
-                  <div style={{ color: '#0284c7', fontWeight: 'bold', marginTop: '4px', fontSize: '11px' }}>
+                  <div style={{ color: '#0873D1', fontWeight: 'bold', marginTop: '4px', fontSize: '11px' }}>
                     Walking Reach (800m Buffer Highlighted)
                   </div>
                 </div>
@@ -632,7 +661,7 @@ export default function MapView({
           if (!alert.lat || !alert.lon) return null;
           const isResolved = alert.status === 'RESOLVED';
           const isCritical = alert.urgency === 'CRITICAL';
-          const pinColor = isResolved ? '#64748b' : (isCritical ? '#ef4444' : '#f97316');
+          const pinColor = isResolved ? '#77848D' : (isCritical ? '#B4473D' : '#D58A3C');
 
           return (
             <CircleMarker
@@ -682,90 +711,47 @@ export default function MapView({
         })}
 
         {/* Active Dropped Hypothetical Intervention Marker & Catchment */}
-        {activeIntervention?.config?.radius_m != null && (
+        {activeIntervention && (activeIntervention.lat != null) && (
           <>
             <Circle 
-              center={[activeIntervention.lat, activeIntervention.lon]}
-              radius={activeIntervention.config.radius_m}
+              center={[activeIntervention.lat, activeIntervention.lon ?? activeIntervention.lng]}
+              radius={activeIntervention.config?.radius_m || 800}
               pathOptions={{
-                color: activeIntervention.config.color,
+                color: activeIntervention.config?.color || '#3b82f6',
                 weight: 2.5,
-                fillColor: activeIntervention.config.color,
+                fillColor: activeIntervention.config?.color || '#3b82f6',
                 fillOpacity: 0.28,
                 dashArray: '5, 5'
               }}
             />
             <CircleMarker
-              center={[activeIntervention.lat, activeIntervention.lon]}
+              center={[activeIntervention.lat, activeIntervention.lon ?? activeIntervention.lng]}
               radius={10}
               pathOptions={{
                 color: '#ffffff',
                 weight: 3,
-                fillColor: '#ef4444',
+                fillColor: activeIntervention.config?.color || '#ef4444',
                 fillOpacity: 1
               }}
             >
               <Popup autoPan={false}>
                 <div style={{ fontFamily: 'sans-serif', fontSize: '12px' }}>
-                  <b style={{ color: '#dc2626', fontSize: '13px' }}>⭐ {activeIntervention.interventionType}</b>
-                  <p style={{ margin: '4px 0', color: '#475569' }}>{activeIntervention.config.description}</p>
-                  <div style={{ color: '#16a34a', fontWeight: 'bold' }}>
-                    +{activeIntervention.newly_served_vuln.toLocaleString()} Residents Protected
-                  </div>
+                  <b style={{ color: '#dc2626', fontSize: '13px' }}>⭐ {activeIntervention.interventionType || 'Proposed Intervention Site'}</b>
+                  <p style={{ margin: '4px 0', color: '#475569' }}>
+                    {activeIntervention.config?.description || `Coordinates: [${Number(activeIntervention.lat).toFixed(4)}, ${Number(activeIntervention.lon ?? activeIntervention.lng).toFixed(4)}]`}
+                  </p>
+                  {activeIntervention.newly_served_vuln != null ? (
+                    <div style={{ color: '#16a34a', fontWeight: 'bold' }}>
+                      +{(activeIntervention.newly_served_vuln ?? 0).toLocaleString()} Residents Protected
+                    </div>
+                  ) : (
+                    <div style={{ color: '#2563eb', fontWeight: 'bold', fontSize: '11px' }}>
+                      Target site selected. Click "Simulate Intervention Impact" to evaluate.
+                    </div>
+                  )}
                 </div>
               </Popup>
             </CircleMarker>
-          </>
-        )}
-        {/* User Current Live Location Beacon (Visible at all times) */}
-        {userLocation?.lat && userLocation?.lon && (
-          <>
-            <Circle
-              center={[userLocation.lat, userLocation.lon]}
-              radius={80}
-              pathOptions={{
-                color: '#2563eb',
-                weight: 1.5,
-                fillColor: '#3b82f6',
-                fillOpacity: 0.16,
-                dashArray: '3, 4'
-              }}
-            />
-            <CircleMarker
-              center={[userLocation.lat, userLocation.lon]}
-              radius={9}
-              pathOptions={{
-                color: '#ffffff',
-                weight: 2.5,
-                fillColor: '#2563eb',
-                fillOpacity: 1
-              }}
-            >
-              <Popup autoPan={false}>
-                <div style={{ padding: '4px', fontFamily: 'var(--font-sans)', minWidth: 160 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                    <span className="live-dot" style={{ width: 8, height: 8 }} />
-                    <strong style={{ fontSize: 12, color: '#0f172a' }}>Current Location</strong>
-                  </div>
-                  <div style={{ fontSize: 11, color: '#475569', marginBottom: 4 }}>
-                    {userAddress || `${userLocation.lat.toFixed(4)}, ${userLocation.lon.toFixed(4)}`}
-                  </div>
-                  <div style={{ fontSize: 10.5, color: '#64748b' }}>
-                    GPS Accuracy: Active | High Precision
-                  </div>
-                </div>
-              </Popup>
-            </CircleMarker>
-            <CircleMarker
-              center={[userLocation.lat, userLocation.lon]}
-              radius={3}
-              pathOptions={{
-                color: '#ffffff',
-                weight: 1,
-                fillColor: '#ffffff',
-                fillOpacity: 1
-              }}
-            />
           </>
         )}
       </MapContainer>
@@ -794,7 +780,7 @@ export default function MapView({
               WAR ROOM: {warRoomViewMode === 'mitigated' ? 'MITIGATED (PLAYBOOK ACTIVE)' : 'UNMITIGATED THREAT'}
             </span>
           ) : isHistoricalReplayActive && historicalStep ? (
-            <span style={{ color: '#fbbf24' }}>
+            <span style={{ color: '#D1A33A' }}>
               REPLAY: {historicalStep.label}
             </span>
           ) : showHeatmap ? (
@@ -809,8 +795,8 @@ export default function MapView({
           className="legend-gradient-bar"
           style={{
             background: activeMetric === 'Tree Canopy Cover (%)'
-              ? 'linear-gradient(90deg, #ef4444, #f59e0b, #84cc16, #10b981, #047857)'
-              : 'linear-gradient(90deg, #10b981, #eab308, #f97316, #ef4444, #7f1d1d)'
+              ? 'linear-gradient(90deg, #B4473D, #CC653E, #D58A3C, #D1A33A, #4E8064)'
+              : 'linear-gradient(90deg, #4E8064, #D1A33A, #D58A3C, #CC653E, #B4473D)'
           }}
         />
         <div className="legend-labels">

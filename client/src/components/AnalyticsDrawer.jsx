@@ -80,11 +80,11 @@ export default function AnalyticsDrawer({
 
       <div className="drawer-body">
         {/* Environmental Injustice Summary Banner */}
-        <div style={{ background: 'rgba(30, 41, 59, 0.6)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '10px', padding: '14px' }}>
-          <div style={{ fontWeight: 800, color: '#f87171', fontSize: '0.88rem', marginBottom: '4px' }}>
+        <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '14px' }}>
+          <div style={{ fontWeight: 600, color: 'var(--semantic-red)', fontSize: '0.88rem', marginBottom: '4px' }}>
             ⚖️ Thermal & Canopy Inequity Findings
           </div>
-          <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: 1.5, margin: 0 }}>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
             Analysis across Raleigh tracts confirms that neighborhoods with lower median incomes ($32k–$48k in Southeast and East Raleigh) have an average tree canopy cover of just <b>19.4%</b> and suffer surface temperatures averaging <b>101.8°F</b> during summer heatwaves—compared to <b>48.6% canopy</b> and <b>91.2°F surface temp</b> in more affluent northern districts.
           </p>
         </div>
@@ -126,7 +126,7 @@ export default function AnalyticsDrawer({
         </div>
 
         {/* Search Results Count */}
-        <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
           Showing {filteredTracts.length} of {tractsList.length} Raleigh census tracts
         </div>
 
@@ -134,7 +134,7 @@ export default function AnalyticsDrawer({
         <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
             <thead>
-              <tr style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#94a3b8', textAlign: 'left', position: 'sticky', top: 0 }}>
+              <tr style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', textAlign: 'left', position: 'sticky', top: 0 }}>
                 <th style={{ padding: '8px 10px' }}>Neighborhood</th>
                 <th style={{ padding: '8px 6px' }}>HVI</th>
                 <th style={{ padding: '8px 6px' }}>Temp</th>
@@ -148,28 +148,28 @@ export default function AnalyticsDrawer({
                 <tr 
                   key={t.GEOID || idx}
                   style={{ 
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                    borderBottom: '1px solid var(--border-subtle)',
                     cursor: 'pointer',
-                    background: idx % 2 === 0 ? 'transparent' : 'rgba(30, 41, 59, 0.25)'
+                    background: idx % 2 === 0 ? 'transparent' : 'var(--bg-elevated)'
                   }}
                   onClick={() => {
                     if (onSelectTract) onSelectTract(t);
                   }}
                   className="hover-row"
                 >
-                  <td style={{ padding: '8px 10px', color: '#f8fafc', fontWeight: 600 }}>
+                  <td style={{ padding: '8px 10px', color: 'var(--text-primary)', fontWeight: 600 }}>
                     {t.neighborhood}
                   </td>
-                  <td style={{ padding: '8px 6px', fontWeight: 800, color: t.heat_vulnerability_index >= 75 ? '#ef4444' : (t.heat_vulnerability_index >= 55 ? '#f97316' : '#10b981') }}>
+                  <td style={{ padding: '8px 6px', fontWeight: 600, color: t.heat_vulnerability_index >= 75 ? 'var(--semantic-red)' : (t.heat_vulnerability_index >= 55 ? 'var(--semantic-orange)' : 'var(--semantic-green)') }}>
                     {t.heat_vulnerability_index}
                   </td>
-                  <td style={{ padding: '8px 6px', color: '#cbd5e1' }}>
+                  <td style={{ padding: '8px 6px', color: 'var(--text-secondary)' }}>
                     {t.surface_temp_f}°F
                   </td>
-                  <td style={{ padding: '8px 6px', color: '#cbd5e1' }}>
+                  <td style={{ padding: '8px 6px', color: 'var(--text-secondary)' }}>
                     {t.canopy_cover_pct}%
                   </td>
-                  <td style={{ padding: '8px 6px', color: '#cbd5e1' }}>
+                  <td style={{ padding: '8px 6px', color: 'var(--text-secondary)' }}>
                     {t.walk_time_min}m
                   </td>
                   <td style={{ padding: '8px 6px' }}>

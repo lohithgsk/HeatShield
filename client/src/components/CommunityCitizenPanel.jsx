@@ -24,7 +24,16 @@ export default function CommunityCitizenPanel({
   selectedTract,
   onConsultCopilot,
   trackedAddresses = [],
-  subscriberEmail = null
+  subscriberEmail = null,
+  activeMetric,
+  setActiveMetric,
+  showDeadZones,
+  setShowDeadZones,
+  showBuffers,
+  setShowBuffers,
+  showResources,
+  setShowResources,
+  kpis
 }) {
   const [mode, setMode] = useState('address');
   const [addressInput, setAddressInput] = useState(userAddress || '');
@@ -77,10 +86,10 @@ export default function CommunityCitizenPanel({
   const walkMinutes = nearestData?.walk_minutes ?? 9;
   const walkMeters = nearestData?.distance_meters ?? 720;
 
-  const tempF = liveWeather?.temp_f ?? 78;
-  const feelsF = liveWeather?.feels_like_f ?? 81;
+  const tempF = liveWeather?.temperature_f ?? liveWeather?.temp_f;
+  const feelsF = liveWeather?.apparent_temperature_f ?? liveWeather?.feels_like_f;
   const riskLevel = tempF >= 95 ? 'high' : tempF >= 85 ? 'moderate' : 'low';
-  const riskLabel = tempF >= 95 ? 'High Risk' : tempF >= 85 ? 'Moderate' : 'Normal';
+  const riskLabel = tempF == null ? 'Unavailable' : tempF >= 95 ? 'High Risk' : tempF >= 85 ? 'Moderate' : 'Normal';
 
   return (
     <div className="floating-control-panel community-citizen-panel">
@@ -217,8 +226,10 @@ export default function CommunityCitizenPanel({
           <div className="section-label">Current Exposure</div>
           <div className="weather-card">
             <div>
-              <div className="weather-temp">{tempF}°F</div>
-              <div className="weather-feels">Feels like {feelsF}°F · {liveWeather?.humidity_pct ?? 65}% humidity</div>
+              <div className="weather-temp">{tempF ?? '--'}{tempF != null ? '°F' : ''}</div>
+              <div className="weather-feels">
+                Feels like {feelsF != null ? `${feelsF}°F` : '--'} · {liveWeather?.humidity_pct ?? '--'}% humidity
+              </div>
             </div>
             <span className={`risk-badge ${riskLevel}`}>{riskLabel}</span>
           </div>
@@ -258,7 +269,71 @@ export default function CommunityCitizenPanel({
 
         <div className="divider" />
 
-        {/* 4. Critical Action: Report Hazard */}
+        {/* 4. Resident Map Layers & Choropleth Metric */}
+        <div>
+          <div className="section-label">Map View & Overlays</div>
+          
+          {/* Choropleth Metric Selection */}
+          <div style={{ marginBottom: 12 }}>
+            <label className="field-label" style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-tertiary)', fontWeight: 600, marginBottom: 4, display: 'block' }}>
+              Heat Metric Layer
+            </label>
+            <select
+              className="field-select"
+              value={activeMetric || 'Heat Vulnerability Index (HVI)'}
+              onChange={(e) => setActiveMetric && setActiveMetric(e.target.value)}
+              style={{ fontSize: '11.5px', width: '100%', padding: '6px 8px' }}
+            >
+              <option value="Heat Vulnerability Index (HVI)">Heat Vulnerability Index (HVI)</option>
+              <option value="Surface Temperature (°F)">Surface Temperature (°F)</option>
+              <option value="Tree Canopy Cover (%)">Tree Canopy Cover (%)</option>
+              <option value="Impervious Surface (%)">Impervious Surface (%)</option>
+            </select>
+          </div>
+
+          {/* Layer Visibility Toggles */}
+          <div className="toggle-list">
+            <label className="toggle-item">
+              <input
+                type="checkbox"
+                checked={showDeadZones ?? true}
+                onChange={(e) => setShowDeadZones && setShowDeadZones(e.target.checked)}
+              />
+              <span className="toggle-slider" />
+              <span className="toggle-label danger" style={{ fontSize: '11px' }}>
+                Heat Dead Zones ({kpis?.dead_zones_count ?? 22})
+              </span>
+            </label>
+
+            <label className="toggle-item">
+              <input
+                type="checkbox"
+                checked={showBuffers ?? true}
+                onChange={(e) => setShowBuffers && setShowBuffers(e.target.checked)}
+              />
+              <span className="toggle-slider" />
+              <span className="toggle-label" style={{ fontSize: '11px' }}>
+                Pedestrian Catchments (800m Walk)
+              </span>
+            </label>
+
+            <label className="toggle-item">
+              <input
+                type="checkbox"
+                checked={showResources ?? true}
+                onChange={(e) => setShowResources && setShowResources(e.target.checked)}
+              />
+              <span className="toggle-slider" />
+              <span className="toggle-label" style={{ fontSize: '11px' }}>
+                Cooling Shelters & Water Assets
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div className="divider" />
+
+        {/* 5. Critical Action: Report Hazard */}
         <div>
           <button
             className="btn btn-danger-solid btn-full"

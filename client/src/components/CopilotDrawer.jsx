@@ -100,7 +100,7 @@ export default function CopilotDrawer({
 
       <div className="drawer-body">
         {/* Mode Switcher */}
-        <div style={{ display: 'flex', gap: '6px', background: 'rgba(30, 41, 59, 0.6)', padding: '4px', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', gap: '6px', background: 'var(--bg-card)', padding: '4px', borderRadius: '8px' }}>
           <button 
             className={`btn-nav-action ${mode === 'tract' ? 'active' : ''}`}
             style={{ flex: 1, justifyContent: 'center' }}
@@ -134,8 +134,8 @@ export default function CopilotDrawer({
           <div style={{ display: 'flex', flexDirectio: 'column', gap: '14px' }}>
             {selectedTract ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                  Target Neighborhood: <b style={{ color: '#f8fafc' }}>{selectedTract.neighborhood}</b> (HVI: {selectedTract.heat_vulnerability_index}/100)
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  Target Neighborhood: <b style={{ color: 'var(--text-primary)' }}>{selectedTract.neighborhood}</b> (HVI: {selectedTract.heat_vulnerability_index}/100)
                 </div>
 
                 <button 
@@ -148,7 +148,7 @@ export default function CopilotDrawer({
                 </button>
               </div>
             ) : (
-              <div style={{ color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center', padding: '20px 0' }}>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textAlign: 'center', padding: '20px 0' }}>
                 👈 Click any census tract on the map or select one in the left panel to run an AI vulnerability diagnosis.
               </div>
             )}
@@ -158,7 +158,7 @@ export default function CopilotDrawer({
         {/* Mode 2: Council Memorandum */}
         {mode === 'council' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               Generates an executive policy memorandum ready for presentation to the <b>Raleigh City Council</b> and <b>Wake County Commissioners</b>, synthesizing dead zones and federal grant eligibility (Justice40, FEMA BRIC).
             </p>
             <button 
@@ -177,7 +177,7 @@ export default function CopilotDrawer({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
             <div style={{ flex: 1, minHeight: '220px', maxHeight: '350px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {chatHistory.length === 0 && (
-                <div style={{ color: '#64748b', fontSize: '0.82rem', textAlign: 'center', marginTop: '40px' }}>
+                <div style={{ color: 'var(--text-tertiary)', fontSize: '0.82rem', textAlign: 'center', marginTop: '40px' }}>
                   Ask any question regarding Raleigh's heat islands, street shade priorities, or cooling infrastructure funding.
                 </div>
               )}
@@ -191,8 +191,8 @@ export default function CopilotDrawer({
                     borderRadius: '10px',
                     fontSize: '0.82rem',
                     lineHeight: 1.5,
-                    background: msg.sender === 'user' ? '#2563eb' : 'rgba(30, 41, 59, 0.7)',
-                    color: '#f8fafc',
+                    background: msg.sender === 'user' ? 'var(--semantic-blue)' : 'var(--bg-card)',
+                    color: msg.sender === 'user' ? '#FFFFFF' : 'var(--text-primary)',
                     border: msg.sender === 'user' ? 'none' : '1px solid var(--border-color)'
                   }}
                 >
@@ -226,7 +226,7 @@ export default function CopilotDrawer({
               </button>
               <button 
                 className="btn-primary-action" 
-                style={{ fontSize: '0.75rem', padding: '6px 12px', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}
+                style={{ fontSize: '0.75rem', padding: '6px 12px' }}
                 onClick={() => onSendToAudio(copilotText)}
               >
                 <Radio size={13} />

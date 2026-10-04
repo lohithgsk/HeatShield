@@ -43,7 +43,7 @@ export default function ForecastDrawer({ isOpen, onClose }) {
     <div className={`action-drawer ${isOpen ? 'open' : ''}`} style={{ width: '500px' }}>
       <div className="drawer-header">
         <div className="drawer-title-group">
-          <BrainCircuit size={20} style={{ color: '#a78bfa' }} />
+          <BrainCircuit size={20} style={{ color: 'var(--semantic-blue)' }} />
           <div>
             <h3 className="drawer-title">ML Heat Forecast</h3>
             <span className="drawer-subtitle">HistGradientBoosting · TigerData telemetry</span>
@@ -69,26 +69,26 @@ export default function ForecastDrawer({ isOpen, onClose }) {
         </div> */}
 
         {error && (
-          <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.12)', color: '#fca5a5', fontSize: '0.8rem' }}>
+          <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--semantic-red-bg)', color: 'var(--semantic-red)', fontSize: '0.8rem' }}>
             {error}. Make sure the Flask service is running with <code>python ml_service/app.py</code>.
           </div>
         )}
 
-        {loading && !grouped.length && <div style={{ color: '#94a3b8', fontSize: '0.82rem' }}>Loading station forecasts…</div>}
+        {loading && !grouped.length && <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>Loading station forecasts…</div>}
 
         {grouped.map(stationForecasts => {
           const station = stationForecasts[0];
           return (
             <div key={station.station_id} style={{ border: '1px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden' }}>
-              <div style={{ padding: '10px 12px', background: 'rgba(30, 41, 59, 0.65)', color: '#f8fafc', fontWeight: 700 }}>
+              <div style={{ padding: '10px 12px', background: 'var(--bg-card)', color: 'var(--text-primary)', fontWeight: 600 }}>
                 {station.station_name || station.station_id}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' }}>
                 {stationForecasts.sort((a, b) => a.horizon_minutes - b.horizon_minutes).map(forecast => (
                   <div key={forecast.horizon_minutes} style={{ padding: '10px', borderRight: '1px solid var(--border-color)' }}>
-                    <div style={{ color: '#94a3b8', fontSize: '0.7rem' }}>{horizonLabels[forecast.horizon_minutes]}</div>
-                    <div style={{ color: '#fbbf24', fontSize: '1.2rem', fontWeight: 800 }}>{forecast.predicted_heat_index_f}°F</div>
-                    <div style={{ color: '#cbd5e1', fontSize: '0.68rem' }}>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}>{horizonLabels[forecast.horizon_minutes]}</div>
+                    <div style={{ color: 'var(--semantic-amber-lt)', fontSize: '1.2rem', fontWeight: 600 }}>{forecast.predicted_heat_index_f}°F</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.68rem' }}>
                       {Math.round(forecast.probability_hi_90 * 100)}% above 90°F
                     </div>
                   </div>
@@ -99,7 +99,7 @@ export default function ForecastDrawer({ isOpen, onClose }) {
         })}
 
         {data?.generated_at && (
-          <div style={{ color: '#64748b', fontSize: '0.7rem' }}>
+          <div style={{ color: 'var(--text-tertiary)', fontSize: '0.7rem' }}>
             Updated {new Date(data.generated_at).toLocaleTimeString()}
           </div>
         )}

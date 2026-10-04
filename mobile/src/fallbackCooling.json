@@ -1,0 +1,317 @@
+[
+  {
+    "name": "Kaplan Park",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.772374,
+    "longitude": -78.7130602,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Finch Library",
+    "type": "Public Library",
+    "category": "Indoor A/C Refuge",
+    "latitude": 35.7883,
+    "longitude": -78.6372,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "LGBT Center of Raleigh",
+    "type": "Community Center",
+    "category": "Indoor A/C Refuge",
+    "latitude": 35.7781753,
+    "longitude": -78.639904,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Greystone Recreation Center",
+    "type": "Community Center",
+    "category": "Indoor A/C Refuge",
+    "latitude": 35.8868169,
+    "longitude": -78.6602133,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Springdale Area Recreation Club",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.8962296,
+    "longitude": -78.7232046,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "NC Japan Center",
+    "type": "Community Center",
+    "category": "Indoor A/C Refuge",
+    "latitude": 35.7726648,
+    "longitude": -78.6667851,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Oakboro Park",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.9128289,
+    "longitude": -78.5788453,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "The North Carolina State Library",
+    "type": "Public Library",
+    "category": "Indoor A/C Refuge",
+    "latitude": 35.7828436,
+    "longitude": -78.6370105,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "River Bend Park",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.8608694,
+    "longitude": -78.5297601,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Big Field",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.7690985,
+    "longitude": -78.6623781,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Southeast Raleigh YMCA",
+    "type": "Community Center",
+    "category": "Indoor A/C Refuge",
+    "latitude": 35.7609113,
+    "longitude": -78.61436,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "RUMAH",
+    "type": "Community Center",
+    "category": "Indoor A/C Refuge",
+    "latitude": 35.7804806,
+    "longitude": -78.6457049,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Glen Eden Tennis Park",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.8303172,
+    "longitude": -78.6819495,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Zebra Robotics",
+    "type": "Community Center",
+    "category": "Indoor A/C Refuge",
+    "latitude": 35.9074563,
+    "longitude": -78.5887713,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Buffaloe Road Athletic Complex",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.83764125,
+    "longitude": -78.53671240767059,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Lake Johnson Park",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.7624513,
+    "longitude": -78.71790048177525,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Reedy Creek Trail",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.808183,
+    "longitude": -78.69904230417083,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Kiwanis Park",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.8178271,
+    "longitude": -78.6309268582711,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Alleghany Trail",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.83769225,
+    "longitude": -78.66389351830182,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Neuse River Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.85122205,
+    "longitude": -78.53288823442,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Milburnie Park",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.80255725,
+    "longitude": -78.54214113507777,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Windemere Beaver Dam Park",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.80352235,
+    "longitude": -78.67492065359502,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Bent Creek Trail Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.8829724,
+    "longitude": -78.6413170840811,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Neuse River Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.9353167,
+    "longitude": -78.57250281490718,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Neuse River Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.88002105,
+    "longitude": -78.52739967477785,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Neuse River Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.86922725,
+    "longitude": -78.53519404788535,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "City of Raleigh Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.87217945,
+    "longitude": -78.53414635238221,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Horseshoe Park",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.8844975,
+    "longitude": -78.53698894983243,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Neuse River Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.88343795,
+    "longitude": -78.53137328666159,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Neuse River Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.84475675,
+    "longitude": -78.53119822467858,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Tarheel Club Farm Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.8172569,
+    "longitude": -78.53808682671936,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Milburnie Road Canoe Access Area",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.7990036,
+    "longitude": -78.53762199106376,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Neuse River Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.78776075,
+    "longitude": -78.53783032897354,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Neuse River Greenway",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.7781232,
+    "longitude": -78.53889827273986,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  },
+  {
+    "name": "Anderson Point Park",
+    "type": "Park / Tree Shade",
+    "category": "Outdoor Shade",
+    "latitude": 35.77067695,
+    "longitude": -78.54200645541195,
+    "open_now": true,
+    "hours": "Open Daily 8:00 AM - 8:00 PM"
+  }
+]

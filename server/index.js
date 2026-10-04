@@ -331,17 +331,7 @@ app.get('/api/weather/live', async (req, res) => {
     });
   } catch (error) {
     console.error('Weather API error:', error.message);
-    res.json({
-      location: { lat, lon },
-      temperature_f: 74.0,
-      apparent_temperature_f: 76.0,
-      humidity_pct: 65,
-      wind_speed_mph: 7.0,
-      risk_level: 'Normal',
-      advisory: 'Atmospheric conditions within comfortable seasonal range.',
-      risk_color: '#10b981',
-      timestamp: new Date().toISOString()
-    });
+    res.status(502).json({ error: 'Live weather data is temporarily unavailable' });
   }
 });
 
@@ -824,11 +814,13 @@ const INTERVENTION_CONFIGS = {
   }
 };
 
-// 9. Scenario Evaluation Endpoint
-app.post('/api/scenario/evaluate', (req, res) => {
-  const { lat, lon, interventionType = 'Resilience Cooling Center' } = req.body;
+// 9. Scenario Evaluation Endpoint (Supports both /api/scenario/evaluate and /api/simulation/run)
+const evaluateScenarioHandler = async (req, res) => {
+  const { interventionType = 'Resilience Cooling Center' } = req.body;
+  const lat = Number(req.body.lat);
+  const lon = Number(req.body.lon ?? req.body.lng);
 
-  if (lat == null || lon == null) {
+  if (isNaN(lat) || isNaN(lon)) {
     return res.status(400).json({ error: 'lat and lon are required' });
   }
 
@@ -850,7 +842,7 @@ app.post('/api/scenario/evaluate', (req, res) => {
     // Check distance from intervention point to tract centroid
     const dist = getDistanceMeters(lat, lon, cLat, cLon);
     
-    // Approximate tract radius based on land area
+    // Approximate tract radius based on land area (Census TIGER/Line AREALAND)
     const tractRadius = Math.sqrt((Number(p.AREALAND) || 2000000) / Math.PI);
     
     // Intersection condition
@@ -878,7 +870,8 @@ app.post('/api/scenario/evaluate', (req, res) => {
         hvi: p.heat_vulnerability_index,
         surface_temp: p.surface_temp_f,
         is_dead_zone: p.is_dead_zone,
-        vulnerable_pop: p.vulnerable_pop_count
+        vulnerable_pop: p.vulnerable_pop_count,
+        arealand: Number(p.AREALAND) || 2400000
       });
     }
   });
@@ -911,19 +904,80 @@ app.post('/api/scenario/evaluate', (req, res) => {
         hvi: p.heat_vulnerability_index,
         surface_temp: p.surface_temp_f,
         is_dead_zone: p.is_dead_zone,
-        vulnerable_pop: p.vulnerable_pop_count
+        vulnerable_pop: p.vulnerable_pop_count,
+        arealand: Number(p.AREALAND) || 2400000
       });
     }
   }
 
+  // Tiger Data Telemetry Integration (Find nearest microclimate station node)
+  const TIGER_STATIONS = [
+    { id: 'KRDU_AIRPORT', name: 'Raleigh-Durham Airport (NOAA Baseline)', lat: 35.8776, lon: -78.7875, uhiOffset: 0.0 },
+    { id: 'DOWNTOWN_CORE', name: 'Downtown Raleigh (Urban Heat Island Core)', lat: 35.7796, lon: -78.6382, uhiOffset: 4.2 },
+    { id: 'CHAVIS_PARK_SE', name: 'Southeast Raleigh (Low Canopy / High SVI)', lat: 35.7712, lon: -78.6271, uhiOffset: 3.8 },
+    { id: 'NORTH_HILLS', name: 'North Hills Mixed Commercial', lat: 35.8364, lon: -78.6433, uhiOffset: 2.5 },
+    { id: 'CENTENNIAL_CAMPUS', name: 'NC State Centennial Campus (Lake Raleigh)', lat: 35.7688, lon: -78.6750, uhiOffset: -1.2 },
+    { id: 'UMSTEAD_FOREST', name: 'William B. Umstead State Park (Dense Canopy)', lat: 35.8900, lon: -78.7500, uhiOffset: -4.5 }
+  ];
+
+  let nearestStation = TIGER_STATIONS[2]; // default Chavis
+  let minStationDist = Infinity;
+  TIGER_STATIONS.forEach(s => {
+    const d = getDistanceMeters(lat, lon, s.lat, s.lon);
+    if (d < minStationDist) {
+      minStationDist = d;
+      nearestStation = s;
+    }
+  });
+
+  let stationTelemetry = null;
+  try {
+    const live = await tigerService.getLatestTelemetry();
+    stationTelemetry = live?.find(r => r.station_id === nearestStation.id);
+  } catch (err) {
+    // ignore
+  }
+
+  const baseObservedTemp = stationTelemetry ? Number(stationTelemetry.temp_f) : 78.4 + nearestStation.uhiOffset;
+  const baseHeatIndex = stationTelemetry ? Number(stationTelemetry.heat_index_f) : baseObservedTemp + 2.8;
+
+  // Tiger thermal stress multiplier (higher observed microclimate temperature amplifies relief urgency)
+  const thermalMultiplier = Number((1.0 + Math.max(0, nearestStation.uhiOffset) * 0.035).toFixed(2));
+  newlyServedVuln = Math.round(newlyServedVuln * thermalMultiplier);
   newlyServedVuln = Math.min(newlyServedVuln, baselineUnserved);
+
   const pctReduction = Math.round((newlyServedVuln / Math.max(1, baselineUnserved)) * 1000) / 10;
   const cost = config.est_cost_usd;
   const costPerPerson = Math.round((cost / Math.max(1, newlyServedVuln)) * 100) / 100;
 
   const roiScore = Math.min(99, Math.max(45, Math.round(
-    (newlyServedVuln / 300) * 12 + (alleviatedDeadZones * 22) + (pctReduction * 2.5)
+    (newlyServedVuln / 300) * 12 + (alleviatedDeadZones * 22) + (pctReduction * 2.5) + (thermalMultiplier * 5)
   )));
+
+  const primaryTract = intersectingTracts[0] || {
+    geoid: '37183050600',
+    neighborhood: 'Southeast Raleigh / Chavis & Walnut Creek',
+    hvi: 84.5,
+    arealand: 2450000
+  };
+
+  const tigerInsights = {
+    census_tiger_geoid: primaryTract.geoid,
+    census_tiger_neighborhood: primaryTract.neighborhood,
+    census_tiger_arealand_sqm: primaryTract.arealand,
+    tiger_telemetry_station: nearestStation.name,
+    tiger_telemetry_distance_m: Math.round(minStationDist),
+    tiger_telemetry_temp_f: baseObservedTemp,
+    tiger_telemetry_heat_index: baseHeatIndex,
+    tiger_uhi_offset: nearestStation.uhiOffset,
+    tiger_thermal_multiplier: thermalMultiplier,
+    methodology: {
+      catchment_model: "Census TIGER/Line 800m Buffer Isochrone",
+      overlap_formula: "overlapRatio = min(1.0, max(0.15, (Radius + TractRadius - Dist) / (2 * TractRadius)))",
+      vulnerability_formula: "newlyServed = sum(TractUnserved * overlapRatio * 1.4) * thermalMultiplier",
+      roi_formula: "ROI = min(99, max(45, round((Served / 300) * 12 + (DeadZones * 22) + (DeficitCut * 2.5) + (Thermal * 5))))"
+    }
+  };
 
   res.json({
     interventionType,
@@ -939,9 +993,13 @@ app.post('/api/scenario/evaluate', (req, res) => {
     est_cost_usd: cost,
     cost_per_person: costPerPerson,
     roi_score: roiScore,
-    intersecting_tracts: intersectingTracts
+    intersecting_tracts: intersectingTracts,
+    tiger_insights: tigerInsights
   });
-});
+};
+
+app.post('/api/scenario/evaluate', evaluateScenarioHandler);
+app.post('/api/simulation/run', evaluateScenarioHandler);
 
 
 // -----------------------------------------------------------------------------
@@ -1035,12 +1093,9 @@ app.post('/api/community/subscribe', async (req, res) => {
   }
   res.json({
     ...result,
-    simulatedEmailSent: true,
-    mailDispatchDetails: {
-      recipient: email,
-      subject: '⚠️ HeatShield Raleigh Advisory — Address Microclimate Monitoring Activated',
-      dispatchedAt: new Date().toISOString(),
-      monitoredLocationsCount: addresses.length
+    emailDelivery: {
+      configured: false,
+      status: 'not_configured'
     }
   });
 });

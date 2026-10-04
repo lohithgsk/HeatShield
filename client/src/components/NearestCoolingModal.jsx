@@ -24,8 +24,7 @@ export default function NearestCoolingModal({
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(9, 13, 22, 0.75)',
-      backdropFilter: 'blur(8px)',
+      background: 'rgba(29, 41, 50, 0.42)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -35,7 +34,7 @@ export default function NearestCoolingModal({
       <div style={{
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-default)',
-        borderRadius: '16px',
+        borderRadius: '8px',
         width: '100%',
         maxWidth: '520px',
         boxShadow: 'var(--shadow-lg)',
@@ -46,7 +45,7 @@ export default function NearestCoolingModal({
         {/* Modal Header */}
         <div style={{
           padding: '16px 20px',
-          borderBottom: '1px solid var(--border-color)',
+          borderBottom: '1px solid var(--border-default)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
@@ -60,15 +59,15 @@ export default function NearestCoolingModal({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#38bdf8'
+              color: 'var(--semantic-blue)'
             }}>
               <Navigation size={18} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: '#f8fafc' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
                 Nearest Cooling Refuge Guide
               </h3>
-              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
                 Based on your live GPS location & microclimate telemetry
               </span>
             </div>
@@ -78,7 +77,7 @@ export default function NearestCoolingModal({
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#94a3b8',
+              color: 'var(--text-secondary)',
               cursor: 'pointer',
               padding: '6px'
             }}
@@ -92,9 +91,9 @@ export default function NearestCoolingModal({
           {/* Live Heat Index Ribbon */}
           {liveWeather && (
             <div style={{
-              background: 'rgba(15, 23, 42, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '10px',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-default)',
+              borderRadius: '8px',
               padding: '10px 14px',
               display: 'flex',
               alignItems: 'center',
@@ -102,21 +101,21 @@ export default function NearestCoolingModal({
               fontSize: '0.8rem'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Thermometer size={16} style={{ color: liveWeather.risk_color || '#eab308' }} />
-                <span>Current Ambient: <b>{liveWeather.temperature_f}°F</b></span>
-                <span style={{ color: '#94a3b8' }}>•</span>
-                <span>Heat Index: <b style={{ color: liveWeather.risk_color }}>{liveWeather.apparent_temperature_f}°F</b></span>
+                <Thermometer size={16} style={{ color: 'var(--semantic-amber)' }} />
+                <span>Current Ambient: <b>{liveWeather?.temperature_f ?? liveWeather?.temp_f ?? '--'}°F</b></span>
+                <span style={{ color: 'var(--text-secondary)' }}>•</span>
+                <span>Heat Index: <b style={{ color: liveWeather?.risk_color }}>{liveWeather?.apparent_temperature_f ?? liveWeather?.feels_like_f ?? '--'}°F</b></span>
               </div>
               <span style={{
                 padding: '2px 8px',
                 borderRadius: '6px',
                 fontSize: '0.72rem',
                 fontWeight: 700,
-                background: `${liveWeather.risk_color}22`,
-                color: liveWeather.risk_color,
-                border: `1px solid ${liveWeather.risk_color}55`
+                background: `${liveWeather?.risk_color || '#77848D'}22`,
+                color: liveWeather?.risk_color || '#77848D',
+                border: `1px solid ${liveWeather?.risk_color || '#77848D'}55`
               }}>
-                {liveWeather.risk_level}
+                {liveWeather?.risk_level || 'Unavailable'}
               </span>
             </div>
           )}
@@ -124,9 +123,9 @@ export default function NearestCoolingModal({
           {/* Primary Nearest Asset Card */}
           {nearest && (
             <div style={{
-              background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(30, 41, 59, 0.6) 100%)',
-              border: '1px solid rgba(59, 130, 246, 0.4)',
-              borderRadius: '12px',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-default)',
+              borderRadius: '8px',
               padding: '18px',
               display: 'flex',
               flexDirection: 'column',
@@ -143,10 +142,10 @@ export default function NearestCoolingModal({
                   }}>
                     Closest Available Refuge
                   </span>
-                  <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0 2px 0' }}>
+                  <h4 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-primary)', margin: '4px 0 2px 0' }}>
                     {nearest.name}
                   </h4>
-                  <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                     {nearest.type} • {nearest.category}
                   </div>
                 </div>
@@ -155,10 +154,10 @@ export default function NearestCoolingModal({
                   textAlign: 'right',
                   fontFamily: 'var(--font-mono)'
                 }}>
-                  <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#38bdf8' }}>
+                  <div style={{ fontSize: '1.3rem', fontWeight: 600, color: 'var(--semantic-blue)' }}>
                     {nearest.walk_minutes}m
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
                     {nearest.distance_meters}m ({nearest.distance_miles} mi)
                   </div>
                 </div>
@@ -170,7 +169,7 @@ export default function NearestCoolingModal({
                 alignItems: 'center',
                 gap: '8px',
                 fontSize: '0.78rem',
-                color: nearest.within_10min ? '#34d399' : '#fb923c'
+                color: nearest.within_10min ? 'var(--semantic-green)' : 'var(--semantic-amber)'
               }}>
                 <ShieldCheck size={16} />
                 <span>
@@ -212,7 +211,7 @@ export default function NearestCoolingModal({
           {/* Alternative Nearby Assets List */}
           {nearestData.top_options?.length > 1 && (
             <div>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', display: 'block', marginBottom: '8px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px' }}>
                 Other Nearby Cooling Assets
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -220,8 +219,8 @@ export default function NearestCoolingModal({
                   <div 
                     key={idx}
                     style={{
-                      background: 'rgba(30, 41, 59, 0.45)',
-                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-default)',
                       borderRadius: '8px',
                       padding: '8px 12px',
                       display: 'flex',
@@ -235,10 +234,10 @@ export default function NearestCoolingModal({
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc' }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                         {asset.name}
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
                         {asset.type} • {asset.category}
                       </div>
                     </div>
@@ -247,7 +246,7 @@ export default function NearestCoolingModal({
                       <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#60a5fa' }}>
                         {asset.walk_minutes} min
                       </div>
-                      <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)' }}>
                         {asset.distance_meters}m
                       </div>
                     </div>

@@ -251,7 +251,7 @@ RECOMMENDATION: Immediate authorization of $${mitigation.totalCostUsd.toLocaleSt
                 <div style={{ marginTop: 12 }}>
                   <div className="section-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Top Priority Breach Tracts</span>
-                    <span style={{ color: 'var(--red-lt)' }}>{activeScenario.threatTracts.length} Critical Zones</span>
+                    <span style={{ color: 'var(--semantic-red)' }}>{activeScenario.threatTracts.length} Critical Zones</span>
                   </div>
                   <div className="threat-tract-list">
                     {activeScenario.threatTracts.map((tt, i) => (
@@ -343,7 +343,7 @@ RECOMMENDATION: Immediate authorization of $${mitigation.totalCostUsd.toLocaleSt
                   <strong>SIMULATED OUTCOME WITH PRE-EMPTIVE DEPLOYMENT:</strong>
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                  Total Pre-Deployment Budget: <strong style={{ color: '#fff' }}>${mitigation.totalCostUsd.toLocaleString()}</strong>
+                  Total Pre-Deployment Budget: <strong style={{ color: 'var(--text-primary)' }}>${mitigation.totalCostUsd.toLocaleString()}</strong>
                 </div>
               </div>
 
