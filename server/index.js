@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const dotenv = require('dotenv');
+const { spawn } = require('child_process');
 
 // Load environment variables from parent root or current directory
 const envPath = path.resolve(__dirname, '../.env');
@@ -15,6 +16,9 @@ if (fs.existsSync(envPath)) {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+// Bind to every interface by default so devices on the same Wi-Fi can reach it.
+// Set HOST=127.0.0.1 when the API should be local-only.
+const HOST = process.env.HOST || '0.0.0.0';
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -106,6 +110,65 @@ function getDistanceMeters(lat1, lon1, lat2, lon2) {
             Math.sin(dLon/2) * Math.sin(dLon/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
+}
+
+function pointInRing(point, ring) {
+  const [lon, lat] = point;
+  let inside = false;
+  for (let index = 0, previous = ring.length - 1; index < ring.length; previous = index++) {
+    const [currentLon, currentLat] = ring[index];
+    const [previousLon, previousLat] = ring[previous];
+    const intersects = ((currentLat > lat) !== (previousLat > lat)) &&
+      (lon < (previousLon - currentLon) * (lat - currentLat) / (previousLat - currentLat) + currentLon);
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+function pointInGeometry(point, geometry) {
+  if (!geometry) return false;
+  if (geometry.type === 'Polygon') {
+    return pointInRing(point, geometry.coordinates[0]) &&
+      !geometry.coordinates.slice(1).some(ring => pointInRing(point, ring));
+  }
+  if (geometry.type === 'MultiPolygon') {
+    return geometry.coordinates.some(polygon => pointInGeometry(point, { type: 'Polygon', coordinates: polygon }));
+  }
+  return false;
+}
+
+function percentile(value, values) {
+  const valid = values.filter(Number.isFinite).sort((a, b) => a - b);
+  if (!valid.length || !Number.isFinite(value)) return null;
+  return Math.round((valid.filter(candidate => candidate <= value).length / valid.length) * 100);
+}
+
+function getHoursStatus(resource) {
+  const hours = resource.hours;
+  if (!hours) return { open_now: null, hours_today: null, hours_source: null };
+  const day = new Intl.DateTimeFormat('en-US', { weekday: 'long', timeZone: 'America/New_York' }).format(new Date()).toLowerCase();
+  const today = hours[day];
+  if (!today || today.closed) return { open_now: false, hours_today: 'Closed', hours_source: resource.hours_source || 'Resource registry' };
+  if (!today.open || !today.close) return { open_now: null, hours_today: 'Hours unavailable', hours_source: resource.hours_source || 'Resource registry' };
+  const current = new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/New_York' }).format(new Date());
+  const nowMinutes = Number(current.slice(0, 2)) * 60 + Number(current.slice(3));
+  const toMinutes = value => {
+    const [hour, minute] = value.split(':').map(Number);
+    return hour * 60 + minute;
+  };
+  const openNow = nowMinutes >= toMinutes(today.open) && nowMinutes < toMinutes(today.close);
+  return { open_now: openNow, hours_today: `${today.open} - ${today.close}`, hours_source: resource.hours_source || 'Resource registry' };
+}
+
+function fallbackRoute(origin, destination) {
+  const distance = getDistanceMeters(origin.lat, origin.lon, destination.lat, destination.lon);
+  return {
+    route_source: 'straight_line_fallback',
+    distance_meters: Math.round(distance),
+    duration_seconds: Math.round(distance / 1.33),
+    geometry: [[origin.lon, origin.lat], [destination.lon, destination.lat]],
+    steps: [{ instruction: 'Walk toward your destination using a map app for live street guidance.', distance_meters: Math.round(distance) }]
+  };
 }
 
 // -----------------------------------------------------------------------------
@@ -229,7 +292,8 @@ app.post('/api/cooling/nearest', (req, res) => {
       distance_meters: Math.round(distMeters),
       distance_miles: distMiles,
       walk_minutes: walkMinutes,
-      within_10min: distMeters <= 800
+      within_10min: distMeters <= 800,
+      ...getHoursStatus(p)
     };
   });
 
@@ -244,6 +308,78 @@ app.post('/api/cooling/nearest', (req, res) => {
     nearest_indoor_refuge: nearestIndoor,
     top_options: items.slice(0, maxResults)
   });
+});
+
+// 2d. User area heat summary
+app.get('/api/block/me', (req, res) => {
+  const lat = Number(req.query.lat);
+  const lon = Number(req.query.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return res.status(400).json({ error: 'lat and lon are required' });
+  }
+  const features = censusTractsGeoJSON?.features || [];
+  const feature = features.find(item => pointInGeometry([lon, lat], item.geometry));
+  if (!feature) return res.status(404).json({ error: 'No Raleigh census tract found for this location' });
+
+  const properties = feature.properties || {};
+  const temperatures = features.map(item => Number(item.properties?.surface_temp_f));
+  const vulnerability = features.map(item => Number(item.properties?.heat_vulnerability_index));
+  const tempPercentile = percentile(Number(properties.surface_temp_f), temperatures);
+  const hviPercentile = percentile(Number(properties.heat_vulnerability_index), vulnerability);
+  const pavement = Number(properties.impervious_pct);
+  const canopy = Number(properties.canopy_cover_pct);
+  const pavementPhrase = Number.isFinite(pavement) && pavement >= 60 ? 'a lot of pavement' : 'some pavement';
+  const treePhrase = Number.isFinite(canopy) && canopy < 25 ? 'few trees' : 'limited tree cover';
+
+  res.json({
+    geography: 'census_tract',
+    geoid: properties.GEOID,
+    location: { lat, lon },
+    summary: `Your area runs hotter than ${tempPercentile ?? 'many'}% of Raleigh, mostly from ${pavementPhrase} and ${treePhrase}.`,
+    temperature_percentile: tempPercentile,
+    vulnerability_percentile: hviPercentile,
+    metrics: {
+      surface_temp_f: Number(properties.surface_temp_f),
+      ndvi_vegetation: Number(properties.ndvi_vegetation),
+      canopy_cover_pct: canopy,
+      impervious_pct: pavement,
+      heat_vulnerability_index: Number(properties.heat_vulnerability_index),
+      hvi_category: properties.hvi_category,
+      vulnerable_pop_count: Number(properties.vulnerable_pop_count)
+    },
+    source: 'Raleigh census tract dataset'
+  });
+});
+
+// 2e. Walking route. The Python graph service is optional; fallback remains explicit.
+app.post('/api/walking/route', (req, res) => {
+  const { origin, destination } = req.body || {};
+  if (!origin || !destination || ![origin.lat, origin.lon, destination.lat, destination.lon].every(Number.isFinite)) {
+    return res.status(400).json({ error: 'origin and destination lat/lon are required' });
+  }
+
+  const python = spawn(process.env.PYTHON_BIN || 'python', [path.resolve(__dirname, '../services/route_service.py')], { windowsHide: true });
+  let output = '';
+  let errorOutput = '';
+  python.stdout.on('data', chunk => { output += chunk; });
+  python.stderr.on('data', chunk => { errorOutput += chunk; });
+  python.on('error', error => {
+    console.warn('Walking route service unavailable:', error.message);
+    res.json(fallbackRoute(origin, destination));
+  });
+  python.on('close', code => {
+    if (res.headersSent) return;
+    if (code === 0) {
+      try {
+        return res.json(JSON.parse(output));
+      } catch (error) {
+        console.warn('Walking route response was invalid:', error.message);
+      }
+    }
+    if (errorOutput) console.warn('Walking route service:', errorOutput.trim());
+    res.json(fallbackRoute(origin, destination));
+  });
+  python.stdin.end(JSON.stringify({ origin, destination }));
 });
 
 // 3. City KPIs
@@ -726,7 +862,7 @@ if (fs.existsSync(distPath)) {
   });
 }
 
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   console.log(`=======================================================`);
   console.log(`🚀 Raleigh Climate Decision Hub API Server running on port ${PORT}`);
   console.log(`- Health Check: http://localhost:${PORT}/api/health`);

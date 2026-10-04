@@ -103,6 +103,33 @@ GEMINI_API_KEY=your_gemini_api_key_here
 ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
 ```
 *(Both keys are loaded and verified).*
+*(Both keys are loaded and verified).*
+
+### 4. Mobile App (Expo React Native)
+
+The common-user mobile subset lives in `mobile/`. It includes live heat status, nearest cooling resources, opening-status badges, walking routes, and a plain-language heat summary for the user's area.
+
+From the repository root, install the mobile dependencies and start the API. The API binds to `0.0.0.0`, so phones on the same Wi-Fi can reach it:
+
+```powershell
+cd mobile
+npm install
+cd ..
+npm run server
+```
+
+In a second terminal, copy the mobile environment template, replace the example address with this computer's Wi-Fi IPv4 address, and start Expo:
+
+```powershell
+cd mobile
+Copy-Item .env.example .env
+# Edit .env: EXPO_PUBLIC_API_URL=http://<YOUR-LAN-IP>:5000
+npm run start:lan:clear
+```
+
+Find `<YOUR-LAN-IP>` with `ipconfig` (the `IPv4 Address` under the active Wi-Fi adapter), then scan the QR code with Expo Go on a phone connected to that same Wi-Fi network. From the phone browser, open `http://<YOUR-LAN-IP>:5000/api/health` first; it should show JSON. If it does not, allow Node.js through Windows Defender Firewall on **Private** networks (or create an inbound TCP rule for port 5000). For an Android emulator, use `http://10.0.2.2:5000` instead. The mobile app also automatically derives the LAN API address from Expo Go when `expo start --lan` is used, and ignores a stale `localhost` setting on a physical device.
+
+The walking-route card opens turn-by-turn walking directions in Google Maps (or its browser fallback). This avoids requiring a Google Maps SDK key inside Expo Go. The existing cooling dataset does not contain opening hours, so the mobile app displays `Hours unknown` until an authoritative hours registry is added. The area card currently describes the surrounding census tract because the repository does not include block-group data.
 
 ---
 

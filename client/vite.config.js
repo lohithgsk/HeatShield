@@ -5,6 +5,8 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
   server: {
+    // Make the dev server reachable from devices on the same Wi-Fi network.
+    host: '0.0.0.0',
     port: 3000,
     proxy: {
       '/api': {

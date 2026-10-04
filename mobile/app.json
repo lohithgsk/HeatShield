@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Raleigh Heat",
+    "slug": "raleigh-heat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#f5f0e8"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Raleigh Heat uses your location to find nearby cooling resources and summarize heat in your area."
+      }
+    },
+    "android": {
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
